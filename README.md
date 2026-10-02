@@ -17,7 +17,11 @@ How to install and launch your application. These should include instructions fo
 ### Create Item to create
 This screen is where users can enter the information for the item they wish to sell
 
-![The screen to create an item to sell](<CreateItemScreen.png>)
+![The screen to create an item to sell](<./attachments/CreateItemScreen.png>)
+
+### Login Screen
+This screen is where users log in.
+![The screen where users log in](<./attachments/LoginScreen.png>)
 
 ## Team members
 
