@@ -67,6 +67,11 @@ This screen is where users can enter the information for the item they wish to s
 This screen is where users log in.
 ![The screen where users log in](./attachments/LoginScreen.png)
 
+### Marketplace Screen
+
+This screen is where users can view and categorize student marketplace listings.
+![The screen to view marketplace listings](./attachments/MarketplaceListingScreen.png)
+
 ## Team members
 
 List each person's name and email address.
