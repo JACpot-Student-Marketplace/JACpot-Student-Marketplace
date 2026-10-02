@@ -31,7 +31,19 @@ Here I wanted to ensure our app desciption was well worded and organized, so I g
 
 ### Luca's Ai Usage below
 
-https://chatgpt.com/s/cx_6abfce2610188191a265bcdbcb996900
+ADR: AI Assistance for Marketplace Navigation and CI Formatting
+Status: Accepted
+Context
+The Login, Marketplace, and Create screens existed separately. I needed to connect them with Navigation3 and resolve a Kotlin formatting failure reported by CI.
+Decision (AI Prompts & Outputs)
+- I supplied a Navigator and Router pattern and asked the AI to link the screens. It adapted the pattern to the project, made App() open Router(), and connected Login → Marketplace → Create.
+- The AI connected item creation to the Marketplace listing view and added the required navigation and serialization dependencies.
+- I pasted the CI ktlintCommonMainSourceSetCheck failure. The AI formatted the affected files and corrected the remaining comments and indentation.
+Rationale:
+I used AI for this section because it would have been very tedious to do by myself. I understand all the code as it is all either given in class or was assignment work. 
+
+The shared Kotlin lint check and JVM compilation passed after the changes. The compiler still reports a non-failing deprecation warning for menuAnchor(). Review the navigation and listing flow yourself before submitting, and add your own contributions and verification details here.
+Chat link: https://chatgpt.com/s/cx_6abfce2610188191a265bcdbcb996900
 
 ### Chris's Ai Usage below
 
@@ -68,66 +80,36 @@ Here the rational was mostly to try and get it to help us research or think of o
 
 ### Luca's Ai Usage below
 
-```
-# Write JACpot project vision
+AI usage log — Architecture Decision Record
 
-> Continuing from [Write Final Project Document](chatgpt-conversation://6abfbc06-7e10-83ea-9946-805b7458f6c9): Create a polished final document for the JACpot Student Marketplace project-vision milestone using the user's assignment requirements and notes from this conversation. Preserve the team's actual process rather than inventing elaborate brainstorming that did not happen. Include: brainstorming/raw-session summary, AI discussion log/summary, targeted research findings (user needs, pain points, competitors/gaps, domain/technical constraints), documented team decision-making and final selection, final project vision, and a compelling ~60-second elevator pitch. Make it sound like authentic college-student work: clear and professional but not overly corporate. JACpot is a John Abbott College student marketplace, similar to Facebook Marketplace but campus-specific. Features: listings, search/filtering, requests/message board, student profiles, chat, ratings, JAC email verification, textbook-specific info including used access-code tags. Safety ideas: full names/student IDs, ratings, suggested meetup spots such as Hertzberg Library/Agora/Zen Zone, in-app warnings, no in-app purchasing and payment in person. Competitors: John Abbott Facebook groups and Facebook Marketplace. The team was aligned on JACpot from the beginning; don't fabricate rejected concepts. Explicitly address the rubric's target user/client, core problem, app category, and tech-driven unique solution.
+### Title
 
-<details><summary>10 previous messages</summary>
+AI assistance for organizing the JACpot project vision and elevator pitch
 
-> I’ll review the rest of the referenced conversation, then put together a final document that reflects the team’s actual discussion and covers each rubric item.
->
-> <details><summary>Explored a search</summary>
->
-> <details><summary>Explored a file, a search</summary>
->
-> - Read `~/.codex/plugins/cache/openai-primary-runtime/documents/26.904.11930/skills/documents/SKILL.md`
-> - Searched for `JACpot|Write Final Project|student marketplace` in `MEMORY.md`
->
-> </details>
->
-> Tool call
->
-> Tool: read_thread
-> Status: completed
->
-> </details>
->
-> The referenced chat confirms that JACpot was the team’s starting point, and its saved message cuts off part of the notes. I’ll use the details you supplied, keep research claims framed as findings to validate, and avoid presenting a reconstructed summary as verbatim session logs. I’m using the document workflow so you get an editable file.
->
-> <details><summary>Created a file, ran 3 commands</summary>
->
-> - Ran `/Users/lucamaiolo/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node /Users/lucamaiolo/.codex/plugins/cache/openai-primary-runtime/documents/26.904.11930/skills/documents/container_tools/mark_artifact_operation_started.mjs --operation-kind create --expected-output-count 1 --output-format docx`
-> - Wrote `./work/build_jacpot.py` (+99 -0)
-> - Ran `mkdir -p outputs work/rendered && /Users/lucamaiolo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 work/build_jacpot.py && /Users/lucamaiolo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 /Users/lucamaiolo/.codex/plugins/cache/openai-primary-runtime/documents/26.904.11930/skills/documents/render_docx.py outputs/JACpot_Project_Vision.docx --output_dir work/rendered`
-> - Ran `ls -lh work/rendered/page-*.png`
->
-> </details>
->
-> Viewed 6 images
->
-> The first render has a table splitting across pages and a short third page. I’m tightening the layout and keeping the comparison together so the document reads cleanly.
->
-> it should be a markdwon file
->
-> <details><summary>Edited a file</summary>
->
-> - Wrote `./work/build_jacpot.py` (+20 -9)
->
-> </details>
->
-> Got it—Markdown is the right format. I’ll deliver the final document as a `.md` file and remove the Word draft.
->
-> <details><summary>Created a file, ran a command</summary>
->
-> - Wrote `./outputs/JACpot_Project_Vision.md` (+76 -0)
-> - Ran `rm -f outputs/JACpot_Project_Vision.docx && wc -w outputs/JACpot_Project_Vision.md && rg -n '^#|^\*\*Decision record|^\*Approximate' outputs/JACpot_Project_Vision.md`
->
-> </details>
-</details>
+### Status
 
-Created the [JACpot project vision document](./outputs/JACpot_Project_Vision.md) as a Markdown file. It covers the milestone requirements and keeps the team’s process honest: JACpot was the shared idea from the start, and the available notes are identified as a summary rather than a verbatim log.
+Accepted
 
-```
+### Context
+
+We had a shared JACpot concept and a set of team notes, but the milestone required several separate deliverables: a record of brainstorming, research findings, the team's decision process, a clear project vision, and a one-minute pitch. We used AI to help organize that material into a readable document. Our notes were incomplete as a transcript, so accurate wording about what the team actually did mattered.
+
+### Decision — AI prompts and outputs
+
+- **Initial prompt:** We supplied the assignment requirements and our notes describing JACpot as a student marketplace that would replace scattered platforms. **Visible AI output:** The AI said it would build a polished document and keep the account authentic to the team's process, including that JACpot was the concept from the start. The referenced conversation does not contain a completed document from that exchange.
+- **Document request:** We asked AI to create the final project-vision document with the specified features, competitors, constraints, decision record, and a roughly 60-second pitch. We explicitly said not to invent rejected concepts. **Output:** AI drafted the Markdown document, including the session summary, working research findings, final vision, and pitch.
+- **Format correction:** We specified that the deliverable should be a Markdown file. **Output:** AI saved the document as Markdown.
+- **AI log revision:** We provided the professor's ADR format and a reusable prompt for recording AI use. **Output:** AI added this ADR section, separating the prompt/output record from the team's own rationale.
+
+### Rationale — manual input required
+
+This was just to make all of our ideas in a coordinated fashion.  No new ideas were given by AI here, just organized them in a good way. 
+### Consequences
+
+AI helped with structure, wording, and the pitch draft. The JACpot concept, feature ideas, and description of the team's alignment came from the supplied team notes and instructions. The AI draft does not replace missing raw meeting transcripts or firsthand user research; those limits are stated in this document. Before submitting, we need to review the draft, fill in the rationale above, and confirm that the wording matches what our team agreed to.
+
+**Conversation record:** 
+https://chatgpt.com/s/cx_6abfff491e108191bbc553e981c24a7a 
+
 
 ### Chris's Ai Usage below
