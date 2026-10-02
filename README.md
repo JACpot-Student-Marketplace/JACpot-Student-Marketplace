@@ -14,6 +14,11 @@ How to install and launch your application. These should include instructions fo
 
 - (by Sprint 1): Screenshots from each of the main screens of your application.
 
+### Create Item to create
+This screen is where users can enter the information for the item they wish to sell
+
+![The screen to create an item to sell](<CreateItemScreen.png>)
+
 ## Team members
 
 List each person's name and email address.
