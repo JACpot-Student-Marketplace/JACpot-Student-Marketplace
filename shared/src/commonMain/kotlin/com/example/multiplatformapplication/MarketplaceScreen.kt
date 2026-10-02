@@ -41,18 +41,19 @@ data class Listing(
     val title: String,
     val price: String,
     val category: String,
-    val seller: String
+    val seller: String,
 )
 
-private val sampleListings = listOf(
-    Listing(1, "Calculus Textbook", "$40", "Textbooks", "Maya"),
-    Listing(2, "Intro to Java", "$25", "Textbooks", "Omar"),
-    Listing(3, "Campus Hoodie", "$18", "Clothes", "Priya"),
-    Listing(4, "Winter Jacket", "$35", "Clothes", "Leo"),
-    Listing(5, "MacBook", "$120", "Tech", "James"),
-    Listing(6, "Drake Concert pair", "$200", "Tickets", "Leo"),
-    Listing(7, "Mario Odyssey", "$40", "Gaming", "Omar")
-)
+private val sampleListings =
+    listOf(
+        Listing(1, "Calculus Textbook", "$40", "Textbooks", "Maya"),
+        Listing(2, "Intro to Java", "$25", "Textbooks", "Omar"),
+        Listing(3, "Campus Hoodie", "$18", "Clothes", "Priya"),
+        Listing(4, "Winter Jacket", "$35", "Clothes", "Leo"),
+        Listing(5, "MacBook", "$120", "Tech", "James"),
+        Listing(6, "Drake Concert pair", "$200", "Tickets", "Leo"),
+        Listing(7, "Mario Odyssey", "$40", "Gaming", "Omar"),
+    )
 
 /**
  * Single marketplace screen. The search text and selected category live here
@@ -61,7 +62,7 @@ private val sampleListings = listOf(
 @Composable
 fun MarketplaceScreen(
     modifier: Modifier = Modifier,
-    createdListings: List<Listing> = emptyList()
+    createdListings: List<Listing> = emptyList(),
 ) {
     val navigator = LocalNavigator.current
     // rememberSaveable keeps these across rotation. remember would reset them
@@ -71,14 +72,16 @@ fun MarketplaceScreen(
 
     // A plain List inside mutableStateOf is not written into the rotation bundle.
     // listSaver stores each name and rebuilds the list after the activity is recreated.
-    val categories = rememberSaveable(
-        saver = listSaver<SnapshotStateList<String>, String>(
-            save = { it.toList() },
-            restore = { it.toMutableStateList() }
-        )
-    ) {
-        mutableStateListOf("All", "Textbooks", "Clothes")
-    }
+    val categories =
+        rememberSaveable(
+            saver =
+                listSaver<SnapshotStateList<String>, String>(
+                    save = { it.toList() },
+                    restore = { it.toMutableStateList() },
+                ),
+        ) {
+            mutableStateListOf("All", "Textbooks", "Clothes")
+        }
     var addingCategory by rememberSaveable { mutableStateOf(false) }
     var newCategoryName by rememberSaveable { mutableStateOf("") }
 
@@ -93,22 +96,25 @@ fun MarketplaceScreen(
 
     // Recomputed on every composition from the fixed catalog. A keystroke or
     // chip tap changes state, recomposes this function, and produces a new list.
-    val visibleListings = (createdListings + sampleListings).filter { listing ->
-        val matchesCategory = selectedCategory == "All" || listing.category == selectedCategory
-        val matchesQuery = query.isBlank() ||
-                listing.title.contains(query.trim(), ignoreCase = true)
-        matchesCategory && matchesQuery
-    }
+    val visibleListings =
+        (createdListings + sampleListings).filter { listing ->
+            val matchesCategory = selectedCategory == "All" || listing.category == selectedCategory
+            val matchesQuery =
+                query.isBlank() ||
+                    listing.title.contains(query.trim(), ignoreCase = true)
+            matchesCategory && matchesQuery
+        }
 
     createdListings.forEach { listing ->
         if (listing.category !in categories) categories.add(listing.category)
     }
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Marketplace", modifier = Modifier.weight(1f))
@@ -118,19 +124,19 @@ fun MarketplaceScreen(
         MarketplaceSearchBar(
             query = query,
             onQueryChange = { query = it },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             categories.forEach { category ->
                 FilterChip(
                     selected = selectedCategory == category,
                     onClick = { selectedCategory = category },
-                    label = { Text(category) }
+                    label = { Text(category) },
                 )
             }
             if (addingCategory) {
@@ -141,7 +147,7 @@ fun MarketplaceScreen(
                     singleLine = true,
                     placeholder = { Text("Category") },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { commitCategory() })
+                    keyboardActions = KeyboardActions(onDone = { commitCategory() }),
                 )
             } else {
                 Button(onClick = { addingCategory = true }) { Text("Add category") }
@@ -154,12 +160,12 @@ fun MarketplaceScreen(
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                contentPadding = PaddingValues(bottom = 16.dp),
             ) {
                 items(visibleListings, key = { it.id }) { listing ->
                     ListingCard(
                         listing = listing,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }

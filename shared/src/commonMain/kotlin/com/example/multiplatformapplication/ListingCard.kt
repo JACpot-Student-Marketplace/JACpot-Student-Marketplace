@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ListingCard(
     listing: Listing,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(modifier = modifier) {
         Column(Modifier.padding(12.dp)) {

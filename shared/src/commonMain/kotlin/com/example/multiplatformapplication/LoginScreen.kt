@@ -34,7 +34,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun LoginScreen() {
     val navigator = LocalNavigator.current
@@ -43,53 +42,55 @@ fun LoginScreen() {
     var isLoggedIn by rememberSaveable { mutableStateOf(false) }
     var errorMessage by rememberSaveable { mutableStateOf("") }
 
-
-    val history: SnapshotStateList<String> = rememberSaveable(
-        saver = listSaver(
-            save = { it.toList() },
-            restore = { it.toMutableStateList() }
-        )
-    ) { mutableStateListOf() }
+    val history: SnapshotStateList<String> =
+        rememberSaveable(
+            saver =
+                listSaver(
+                    save = { it.toList() },
+                    restore = { it.toMutableStateList() },
+                ),
+        ) { mutableStateListOf() }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(24.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFF5F7FA)
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 4.dp
-            )
-        ) {
-
-            Column(
-                modifier = Modifier
+            modifier =
+                Modifier
                     .fillMaxWidth()
-                    .padding(28.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(8.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = Color(0xFFF5F7FA),
+                ),
+            elevation =
+                CardDefaults.cardElevation(
+                    defaultElevation = 4.dp,
+                ),
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
                 Text(
                     "JAC STUDENT MARKETPLACE",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
                 if (!isLoggedIn) {
-
                     TextField(
                         value = username,
                         onValueChange = { username = it },
@@ -97,7 +98,7 @@ fun LoginScreen() {
                         label = {
                             Text("Please enter your username")
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -110,11 +111,12 @@ fun LoginScreen() {
                             Text("Please enter your password")
                         },
                         visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
-                        ),
-                        modifier = Modifier.fillMaxWidth()
+                        keyboardOptions =
+                            KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Done,
+                            ),
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -138,7 +140,7 @@ fun LoginScreen() {
                                 password = ""
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text("Log In")
                     }
@@ -147,9 +149,7 @@ fun LoginScreen() {
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(errorMessage)
                     }
-
                 } else {
-
                     Text("Welcome $username!")
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -161,21 +161,18 @@ fun LoginScreen() {
                             password = ""
                             errorMessage = ""
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text("Log Out")
                     }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-
-
             }
-
         }
         Text(
             "History:",
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -184,5 +181,4 @@ fun LoginScreen() {
             Text(entry)
         }
     }
-
 }

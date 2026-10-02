@@ -3,7 +3,9 @@ package com.example.multiplatformapplication
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 
-class Navigator(private val backStack: NavBackStack<NavKey>) {
+class Navigator(
+    private val backStack: NavBackStack<NavKey>,
+) {
     val current: NavKey?
         get() = backStack.lastOrNull()
 

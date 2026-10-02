@@ -23,7 +23,7 @@ import androidx.compose.ui.text.input.ImeAction
 fun MarketplaceSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -39,8 +39,9 @@ fun MarketplaceSearchBar(
             }
         },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(
-            onSearch = { keyboardController?.hide() }
-        )
+        keyboardActions =
+            KeyboardActions(
+                onSearch = { keyboardController?.hide() },
+            ),
     )
 }

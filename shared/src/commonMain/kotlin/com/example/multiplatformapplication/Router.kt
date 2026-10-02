@@ -23,19 +23,22 @@ data object MarketplaceScreenKey : NavKey
 @Serializable
 data object CreateScreenKey : NavKey
 
-val backStackConfig = SavedStateConfiguration {
-    serializersModule = SerializersModule {
-        polymorphic(NavKey::class) {
-            subclass(LoginScreenKey::class, LoginScreenKey.serializer())
-            subclass(MarketplaceScreenKey::class, MarketplaceScreenKey.serializer())
-            subclass(CreateScreenKey::class, CreateScreenKey.serializer())
-        }
+val backStackConfig =
+    SavedStateConfiguration {
+        serializersModule =
+            SerializersModule {
+                polymorphic(NavKey::class) {
+                    subclass(LoginScreenKey::class, LoginScreenKey.serializer())
+                    subclass(MarketplaceScreenKey::class, MarketplaceScreenKey.serializer())
+                    subclass(CreateScreenKey::class, CreateScreenKey.serializer())
+                }
+            }
     }
-}
 
-val LocalNavigator = compositionLocalOf<Navigator> {
-    error("No Navigator found! Wrap your UI with CompositionLocalProvider.")
-}
+val LocalNavigator =
+    compositionLocalOf<Navigator> {
+        error("No Navigator found! Wrap your UI with CompositionLocalProvider.")
+    }
 
 @Composable
 fun Router() {
@@ -47,24 +50,25 @@ fun Router() {
         NavDisplay(
             backStack = backStack,
             onBack = { navigator.pop() },
-            entryProvider = entryProvider {
-                entry<LoginScreenKey> { LoginScreen() }
-                entry<MarketplaceScreenKey> { MarketplaceScreen(createdListings = createdListings) }
-                entry<CreateScreenKey> {
-                    CreateSellItemForm(onItemCreated = { item ->
-                        createdListings.add(
-                            Listing(
-                                id = 1000 + createdListings.size,
-                                title = item.title,
-                                price = "\$${item.price}",
-                                category = item.category,
-                                seller = "You"
+            entryProvider =
+                entryProvider {
+                    entry<LoginScreenKey> { LoginScreen() }
+                    entry<MarketplaceScreenKey> { MarketplaceScreen(createdListings = createdListings) }
+                    entry<CreateScreenKey> {
+                        CreateSellItemForm(onItemCreated = { item ->
+                            createdListings.add(
+                                Listing(
+                                    id = 1000 + createdListings.size,
+                                    title = item.title,
+                                    price = "\$${item.price}",
+                                    category = item.category,
+                                    seller = "You",
+                                ),
                             )
-                        )
-                        navigator.pop()
-                    })
-                }
-            }
+                            navigator.pop()
+                        })
+                    }
+                },
         )
     }
 }
