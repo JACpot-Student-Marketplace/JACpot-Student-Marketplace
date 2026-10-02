@@ -5,6 +5,8 @@
 
 ### Luca's Ai Usage below
 
+https://chatgpt.com/s/cx_6abfce2610188191a265bcdbcb996900 
+
 ### Chris's Ai Usage below
 
 ## Milestone 1c
