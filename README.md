@@ -18,3 +18,4 @@ How to install and launch your application. These should include instructions fo
 
 List each person's name and email address.
 Jaden Mayoff (MayoffJaden@gmail.com)
+Christopher Cardoza (cardozachristopher1@gmail.com)
