@@ -1,3 +1,5 @@
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
+
 plugins {
     // this is necessary to avoid the plugins to be loaded multiple times
     // in each subproject's classloader
@@ -7,4 +9,17 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0" apply false
+}
+
+subprojects {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+
+    configure<KtlintExtension> {
+        filter {
+            exclude { element ->
+                element.file.path.replace('\\', '/').contains("generated/")
+            }
+        }
+    }
 }

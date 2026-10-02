@@ -1,6 +1,6 @@
 package com.example.multiplatformapplication
 
-class WasmPlatform: Platform {
+class WasmPlatform : Platform {
     override val name: String = "Web with Kotlin/Wasm"
 }
 

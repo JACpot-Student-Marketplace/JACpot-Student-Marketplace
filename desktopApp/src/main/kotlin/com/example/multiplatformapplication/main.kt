@@ -3,11 +3,12 @@ package com.example.multiplatformapplication
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 
-fun main() = application {
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "MultiplatformApplication",
-    ) {
-        App()
+fun main() =
+    application {
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "MultiplatformApplication",
+        ) {
+            App()
+        }
     }
-}
