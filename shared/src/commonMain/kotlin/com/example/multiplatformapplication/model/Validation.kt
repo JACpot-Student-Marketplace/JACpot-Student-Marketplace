@@ -36,7 +36,10 @@ fun validateRequest(request: Request): List<String> {
     return errors
 }
 
-fun requestExpiresAt(createdAt: Long, neededBy: Long?): Long {
+fun requestExpiresAt(
+    createdAt: Long,
+    neededBy: Long?,
+): Long {
     val afterThirtyDays = createdAt + THIRTY_DAYS_MS
     return if (neededBy != null && neededBy < afterThirtyDays) neededBy else afterThirtyDays
 }
@@ -50,8 +53,6 @@ fun validateConversation(conversation: Conversation): List<String> {
     return errors
 }
 
-fun validateMessage(message: Message): String? =
-    if (message.body.isBlank()) "Message text is required." else null
+fun validateMessage(message: Message): String? = if (message.body.isBlank()) "Message text is required." else null
 
-fun validateBuyRequest(buyRequest: BuyRequest): String? =
-    if (buyRequest.priceCents < 0) "Offer price must be zero or greater." else null
+fun validateBuyRequest(buyRequest: BuyRequest): String? = if (buyRequest.priceCents < 0) "Offer price must be zero or greater." else null
