@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
@@ -57,7 +60,17 @@ fun AdaptiveNavigation(
         val pill = MaterialTheme.colorScheme.primaryContainer
         Row(Modifier.fillMaxSize()) {
             if (wide) {
-                NavigationRail {
+                NavigationRail(
+                    modifier = Modifier.width(104.dp),
+                    header = {
+                        Text(
+                            "JACpot",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = blue,
+                            modifier = Modifier.padding(top = 24.dp, bottom = 32.dp),
+                        )
+                    },
+                ) {
                     tabs.forEach { tab ->
                         if (tab.key == ProfileScreenKey) Spacer(Modifier.weight(1f))
                         NavigationRailItem(
@@ -73,6 +86,7 @@ fun AdaptiveNavigation(
                                 ),
                         )
                     }
+                    Spacer(Modifier.height(16.dp))
                 }
             }
             Column(Modifier.weight(1f).fillMaxHeight()) {
