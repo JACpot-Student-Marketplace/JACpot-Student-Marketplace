@@ -1,5 +1,6 @@
-package com.example.multiplatformapplication
+package com.example.multiplatformapplication.ui.screens
 
+import com.example.multiplatformapplication.navigation.LocalNavigator
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

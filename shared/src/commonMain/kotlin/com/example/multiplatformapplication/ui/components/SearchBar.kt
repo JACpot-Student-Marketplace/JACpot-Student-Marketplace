@@ -1,4 +1,4 @@
-package com.example.multiplatformapplication
+package com.example.multiplatformapplication.ui.components
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions

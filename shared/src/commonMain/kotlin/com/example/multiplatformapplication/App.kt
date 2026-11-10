@@ -1,5 +1,7 @@
 package com.example.multiplatformapplication
 
+import com.example.multiplatformapplication.navigation.Router
+import com.example.multiplatformapplication.ui.theme.JACpotTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
