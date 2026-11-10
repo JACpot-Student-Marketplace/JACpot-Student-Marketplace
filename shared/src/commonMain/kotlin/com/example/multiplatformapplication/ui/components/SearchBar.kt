@@ -11,18 +11,20 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 
 /**
- * Search field for the marketplace listing list.
+ * Search field for any filterable list (listings, requests, ...).
  *
  * [query] is owned by the caller. That same string is what the screen uses to
- * decide which listings stay visible, and the caller stores it with
+ * decide which items stay visible, and the caller stores it with
  * rememberSaveable so a rotation does not wipe what the user typed.
+ * [placeholder] says what is being searched, e.g. "Search listings".
  * [onQueryChange] runs on every text change, including the clear button,
  * so the parent can write the new value into state and recompose.
  */
 @Composable
-fun MarketplaceSearchBar(
+fun SearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
+    placeholder: String,
     modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -32,7 +34,7 @@ fun MarketplaceSearchBar(
         onValueChange = onQueryChange,
         modifier = modifier,
         singleLine = true,
-        placeholder = { Text("Search listings") },
+        placeholder = { Text(placeholder) },
         trailingIcon = {
             if (query.isNotEmpty()) {
                 TextButton(onClick = { onQueryChange("") }) { Text("Clear") }

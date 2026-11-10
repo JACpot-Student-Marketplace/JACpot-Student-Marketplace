@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.example.multiplatformapplication.navigation.CreateScreenKey
 import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.ListingCard
-import com.example.multiplatformapplication.ui.components.MarketplaceSearchBar
+import com.example.multiplatformapplication.ui.components.SearchBar
 
 /**
  * One student item for sale. [category] is compared to the selected chip,
@@ -125,9 +125,10 @@ fun MarketplaceScreen(
             Button(onClick = { navigator.navigate(CreateScreenKey) }) { Text("Create listing") }
         }
 
-        MarketplaceSearchBar(
+        SearchBar(
             query = query,
             onQueryChange = { query = it },
+            placeholder = "Search listings",
             modifier = Modifier.fillMaxWidth(),
         )
 
