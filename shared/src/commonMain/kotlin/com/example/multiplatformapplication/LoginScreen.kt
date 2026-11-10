@@ -131,7 +131,7 @@ fun LoginScreen() {
 
                                 if (success) {
                                     isLoggedIn = true
-                                    navigator.replace(MarketplaceScreenKey)
+                                    navigator.replace(HomeScreenKey)
                                     errorMessage = ""
                                 } else {
                                     errorMessage = "Wrong username or password."
