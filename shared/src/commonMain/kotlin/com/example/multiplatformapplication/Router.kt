@@ -18,7 +18,16 @@ import kotlinx.serialization.modules.polymorphic
 data object LoginScreenKey : NavKey
 
 @Serializable
+data object HomeScreenKey : NavKey
+
+@Serializable
 data object MarketplaceScreenKey : NavKey
+
+@Serializable
+data object RequestsScreenKey : NavKey
+
+@Serializable
+data object ProfileScreenKey : NavKey
 
 @Serializable
 data object CreateScreenKey : NavKey
@@ -29,7 +38,10 @@ val backStackConfig =
             SerializersModule {
                 polymorphic(NavKey::class) {
                     subclass(LoginScreenKey::class, LoginScreenKey.serializer())
+                    subclass(HomeScreenKey::class, HomeScreenKey.serializer())
                     subclass(MarketplaceScreenKey::class, MarketplaceScreenKey.serializer())
+                    subclass(RequestsScreenKey::class, RequestsScreenKey.serializer())
+                    subclass(ProfileScreenKey::class, ProfileScreenKey.serializer())
                     subclass(CreateScreenKey::class, CreateScreenKey.serializer())
                 }
             }
@@ -53,7 +65,12 @@ fun Router() {
             entryProvider =
                 entryProvider {
                     entry<LoginScreenKey> { LoginScreen() }
-                    entry<MarketplaceScreenKey> { MarketplaceScreen(createdListings = createdListings) }
+                    entry<HomeScreenKey> { Shell(HomeScreenKey, navigator) { PlaceholderScreen("Home") } }
+                    entry<MarketplaceScreenKey> {
+                        Shell(MarketplaceScreenKey, navigator) { MarketplaceScreen(createdListings = createdListings) }
+                    }
+                    entry<RequestsScreenKey> { Shell(RequestsScreenKey, navigator) { PlaceholderScreen("Requests") } }
+                    entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
                     entry<CreateScreenKey> {
                         CreateSellItemForm(onItemCreated = { item ->
                             createdListings.add(
@@ -72,3 +89,20 @@ fun Router() {
         )
     }
 }
+
+// Tabs sit one level above Home: switching pops back to Home first so the back stack never grows.
+@Composable
+private fun Shell(
+    current: NavKey,
+    navigator: Navigator,
+    content: @Composable () -> Unit,
+) = AdaptiveNavigation(
+    selected = current,
+    onSelect = { key ->
+        if (key != current) {
+            navigator.popUntil(HomeScreenKey)
+            if (key != HomeScreenKey) navigator.navigate(key)
+        }
+    },
+    content = content,
+)
