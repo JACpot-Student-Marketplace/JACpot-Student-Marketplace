@@ -1,6 +1,5 @@
 package com.example.multiplatformapplication.ui.components
 
-import com.example.multiplatformapplication.ui.screens.Listing
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -8,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.multiplatformapplication.ui.screens.Listing
 
 /**
  * One row in the marketplace list.

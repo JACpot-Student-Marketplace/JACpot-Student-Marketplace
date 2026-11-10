@@ -1,9 +1,5 @@
 package com.example.multiplatformapplication.ui.screens
 
-import com.example.multiplatformapplication.auth.authenticate
-import com.example.multiplatformapplication.auth.formatAttempt
-import com.example.multiplatformapplication.navigation.HomeScreenKey
-import com.example.multiplatformapplication.navigation.LocalNavigator
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +33,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.multiplatformapplication.auth.authenticate
+import com.example.multiplatformapplication.auth.formatAttempt
+import com.example.multiplatformapplication.navigation.HomeScreenKey
+import com.example.multiplatformapplication.navigation.LocalNavigator
 
 @Composable
 fun LoginScreen() {

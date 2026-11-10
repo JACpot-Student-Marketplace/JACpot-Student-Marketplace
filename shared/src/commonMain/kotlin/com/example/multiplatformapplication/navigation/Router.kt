@@ -1,10 +1,5 @@
 package com.example.multiplatformapplication.navigation
 
-import com.example.multiplatformapplication.ui.screens.CreateSellItemForm
-import com.example.multiplatformapplication.ui.screens.Listing
-import com.example.multiplatformapplication.ui.screens.LoginScreen
-import com.example.multiplatformapplication.ui.screens.MarketplaceScreen
-import com.example.multiplatformapplication.ui.screens.PlaceholderScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -15,6 +10,11 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.example.multiplatformapplication.ui.screens.CreateSellItemForm
+import com.example.multiplatformapplication.ui.screens.Listing
+import com.example.multiplatformapplication.ui.screens.LoginScreen
+import com.example.multiplatformapplication.ui.screens.MarketplaceScreen
+import com.example.multiplatformapplication.ui.screens.PlaceholderScreen
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic

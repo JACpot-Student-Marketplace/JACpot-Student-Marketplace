@@ -1,9 +1,5 @@
 package com.example.multiplatformapplication.ui.screens
 
-import com.example.multiplatformapplication.navigation.CreateScreenKey
-import com.example.multiplatformapplication.navigation.LocalNavigator
-import com.example.multiplatformapplication.ui.components.ListingCard
-import com.example.multiplatformapplication.ui.components.MarketplaceSearchBar
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.example.multiplatformapplication.navigation.CreateScreenKey
+import com.example.multiplatformapplication.navigation.LocalNavigator
+import com.example.multiplatformapplication.ui.components.ListingCard
+import com.example.multiplatformapplication.ui.components.MarketplaceSearchBar
 
 /**
  * One student item for sale. [category] is compared to the selected chip,
