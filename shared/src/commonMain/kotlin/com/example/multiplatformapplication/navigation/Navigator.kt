@@ -1,4 +1,4 @@
-package com.example.multiplatformapplication
+package com.example.multiplatformapplication.navigation
 
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey

@@ -1,4 +1,4 @@
-package com.example.multiplatformapplication
+package com.example.multiplatformapplication.auth
 
 data class User(
     val username: String,

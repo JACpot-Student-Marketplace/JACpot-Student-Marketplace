@@ -1,4 +1,4 @@
-package com.example.multiplatformapplication
+package com.example.multiplatformapplication.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.multiplatformapplication.navigation.LocalNavigator
 
 // Simple dataclass holding the values inputted by a user which represent an item to be "sold"
 data class Item(
