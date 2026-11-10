@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.multiplatformapplication.navigation.LocalNavigator
+import com.example.multiplatformapplication.ui.components.ButtonStyle
+import com.example.multiplatformapplication.ui.components.JACpotButton
 
 // Simple dataclass holding the values inputted by a user which represent an item to be "sold"
 data class Item(
@@ -96,7 +97,7 @@ fun CreateSellItemForm(
         }
 
     Column {
-        Button(onClick = { navigator.pop() }) { Text("Back to Marketplace") }
+        JACpotButton("Back to Marketplace", onClick = { navigator.pop() }, style = ButtonStyle.Outlined)
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(15.dp), // alignment and padding to make everything look nice! Hopefully lol
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -166,7 +167,7 @@ fun CreateSellItemForm(
                             }
                         }
                     }
-                    Button(onClick = {
+                    JACpotButton(text = "Create Item", onClick = {
                         var isValid = true; // reset at the start
 
                         if (titleInput.isEmpty()) { // check if title is empty
@@ -207,9 +208,7 @@ fun CreateSellItemForm(
                             priceInput = ""
                             selectedCategory = ""
                         }
-                    }) {
-                        Text(text = "Create Item")
-                    }
+                    })
                 }
             }
 

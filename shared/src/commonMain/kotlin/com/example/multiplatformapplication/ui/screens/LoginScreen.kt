@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +36,7 @@ import com.example.multiplatformapplication.auth.authenticate
 import com.example.multiplatformapplication.auth.formatAttempt
 import com.example.multiplatformapplication.navigation.HomeScreenKey
 import com.example.multiplatformapplication.navigation.LocalNavigator
+import com.example.multiplatformapplication.ui.components.JACpotButton
 
 @Composable
 fun LoginScreen() {
@@ -125,7 +125,8 @@ fun LoginScreen() {
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    Button(
+                    JACpotButton(
+                        text = "Log In",
                         onClick = {
                             if (username.isEmpty() || password.isEmpty()) {
                                 errorMessage = "Enter a username and password."
@@ -145,9 +146,7 @@ fun LoginScreen() {
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Log In")
-                    }
+                    )
 
                     if (errorMessage.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(10.dp))
@@ -158,7 +157,8 @@ fun LoginScreen() {
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    Button(
+                    JACpotButton(
+                        text = "Log Out",
                         onClick = {
                             isLoggedIn = false
                             username = ""
@@ -166,9 +166,7 @@ fun LoginScreen() {
                             errorMessage = ""
                         },
                         modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Log Out")
-                    }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
