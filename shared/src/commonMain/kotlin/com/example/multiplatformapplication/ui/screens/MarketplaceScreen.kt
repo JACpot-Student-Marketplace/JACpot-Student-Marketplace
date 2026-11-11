@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.example.multiplatformapplication.navigation.CreateScreenKey
 import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.JACpotButton
+import com.example.multiplatformapplication.ui.components.JACpotTextField
 import com.example.multiplatformapplication.ui.components.ListingCard
 import com.example.multiplatformapplication.ui.components.SearchBar
 
@@ -145,12 +145,12 @@ fun MarketplaceScreen(
                 )
             }
             if (addingCategory) {
-                OutlinedTextField(
+                JACpotTextField(
                     value = newCategoryName,
                     onValueChange = { newCategoryName = it },
                     modifier = Modifier.width(160.dp),
                     singleLine = true,
-                    placeholder = { Text("Category") },
+                    placeholder = "Category",
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { commitCategory() }),
                 )
