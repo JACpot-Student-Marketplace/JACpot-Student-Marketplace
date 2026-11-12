@@ -2,7 +2,7 @@ package com.example.multiplatformapplication.ui.screens
 
 import kotlin.time.Clock
 
-private const val DAY_MS = 86_400_000L
+internal const val DAY_MS = 86_400_000L
 
 private fun isLeap(year: Int) = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
 

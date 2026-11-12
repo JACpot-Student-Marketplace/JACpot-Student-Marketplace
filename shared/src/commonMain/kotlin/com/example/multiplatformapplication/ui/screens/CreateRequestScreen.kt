@@ -19,11 +19,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.multiplatformapplication.model.Request
 import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.JACpotDropdown
 import com.example.multiplatformapplication.ui.components.JACpotTextField
+import kotlin.time.Clock
 
 private val monthNames =
     listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
@@ -32,7 +34,7 @@ private val monthNames =
 private const val NONE = "—"
 
 @Composable
-fun CreateRequestScreen() {
+fun CreateRequestScreen(onSubmit: (Request) -> Unit) {
     val navigator = LocalNavigator.current
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
@@ -41,6 +43,11 @@ fun CreateRequestScreen() {
     var month by rememberSaveable { mutableStateOf<Int?>(null) }
     var day by rememberSaveable { mutableStateOf<Int?>(null) }
     var year by rememberSaveable { mutableStateOf<Int?>(null) }
+    var submitted by rememberSaveable { mutableStateOf(false) }
+
+    // Re-checked on every change once Post was pressed, so errors vanish as soon as the input is fixed.
+    fun check() = validateRequestForm(title, description, courseCode, budget, month, day, year, Clock.System.now().toEpochMilliseconds())
+    val errors = if (submitted) check() else RequestFormErrors()
 
     val thisYear = currentYear()
     val pickedMonth = month
@@ -58,14 +65,19 @@ fun CreateRequestScreen() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        JACpotTextField(title, { title = it }, Modifier.fillMaxWidth(), label = "Item title", maxLines = 2)
-        JACpotTextField(description, { description = it }, Modifier.fillMaxWidth(), label = "Description", maxLines = 4)
-        JACpotTextField(courseCode, { courseCode = it }, Modifier.fillMaxWidth(), label = "Course code", singleLine = true)
+        JACpotTextField(title, { title = it }, Modifier.fillMaxWidth(), label = "Item title", maxLines = 2, errorText = errors.title)
+        JACpotTextField(description, {
+            description = it
+        }, Modifier.fillMaxWidth(), label = "Description", maxLines = 4, errorText = errors.description)
+        JACpotTextField(courseCode, {
+            courseCode = it
+        }, Modifier.fillMaxWidth(), label = "Course code", singleLine = true, errorText = errors.courseOrBudget)
         JACpotTextField(
             budget,
             { budget = it },
             Modifier.fillMaxWidth(),
             label = "Maximum budget (CAD)",
+            errorText = errors.budget ?: errors.courseOrBudget,
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         )
@@ -101,5 +113,18 @@ fun CreateRequestScreen() {
                 modifier = Modifier.weight(1f),
             )
         }
+        errors.neededBy?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
+
+        JACpotButton(
+            "Post request",
+            onClick = {
+                submitted = true
+                if (!check().any) {
+                    val now = Clock.System.now().toEpochMilliseconds()
+                    onSubmit(buildRequest(title, description, courseCode, budget, month, day, year, now))
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
