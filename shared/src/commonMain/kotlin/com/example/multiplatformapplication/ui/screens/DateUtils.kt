@@ -31,3 +31,17 @@ internal fun currentYear(): Int {
     val month = (5 * doy + 2) / 153 // March-based month index
     return (yoe + era * 400 + if (month >= 10) 1 else 0).toInt()
 }
+
+/** Midnight UTC of the given date as epoch millis (days-from-civil algorithm). Caller has checked the date is real. */
+internal fun toEpochMillis(
+    year: Int,
+    month: Int,
+    day: Int,
+): Long {
+    val y = (if (month <= 2) year - 1 else year).toLong()
+    val era = y.floorDiv(400)
+    val yoe = y - era * 400
+    val doy = (153 * (month + (if (month > 2) -3 else 9)) + 2) / 5 + day - 1
+    val doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
+    return (era * 146_097 + doe - 719_468) * DAY_MS
+}
