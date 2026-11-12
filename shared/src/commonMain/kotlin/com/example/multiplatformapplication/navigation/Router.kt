@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.example.multiplatformapplication.ui.screens.CreateRequestScreen
 import com.example.multiplatformapplication.ui.screens.CreateSellItemForm
 import com.example.multiplatformapplication.ui.screens.Listing
 import com.example.multiplatformapplication.ui.screens.LoginScreen
@@ -37,6 +38,9 @@ data object ProfileScreenKey : NavKey
 @Serializable
 data object CreateScreenKey : NavKey
 
+@Serializable
+data object CreateRequestScreenKey : NavKey
+
 val backStackConfig =
     SavedStateConfiguration {
         serializersModule =
@@ -48,6 +52,7 @@ val backStackConfig =
                     subclass(RequestsScreenKey::class, RequestsScreenKey.serializer())
                     subclass(ProfileScreenKey::class, ProfileScreenKey.serializer())
                     subclass(CreateScreenKey::class, CreateScreenKey.serializer())
+                    subclass(CreateRequestScreenKey::class, CreateRequestScreenKey.serializer())
                 }
             }
     }
@@ -74,7 +79,12 @@ fun Router() {
                     entry<MarketplaceScreenKey> {
                         Shell(MarketplaceScreenKey, navigator) { MarketplaceScreen(createdListings = createdListings) }
                     }
-                    entry<RequestsScreenKey> { Shell(RequestsScreenKey, navigator) { PlaceholderScreen("Requests") } }
+                    entry<RequestsScreenKey> {
+                        Shell(RequestsScreenKey, navigator) {
+                            PlaceholderScreen("Requests", "Post a request") { navigator.navigate(CreateRequestScreenKey) }
+                        }
+                    }
+                    entry<CreateRequestScreenKey> { CreateRequestScreen() }
                     entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
                     entry<CreateScreenKey> {
                         CreateSellItemForm(onItemCreated = { item ->
