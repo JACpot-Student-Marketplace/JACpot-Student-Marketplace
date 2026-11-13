@@ -21,7 +21,7 @@ val ItemCondition.label: String
             ItemCondition.POOR -> "Poor"
         }
 
-//In cad prices from cents, so 100 is $1. 1250 would be $12.50
+// In cad prices from cents, so 100 is $1. 1250 would be $12.50
 fun formatPrice(cents: Long): String {
     val dollars = cents / 100
     val rest = cents % 100
