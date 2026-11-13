@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -26,7 +24,6 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -37,6 +34,8 @@ import com.example.multiplatformapplication.auth.authenticate
 import com.example.multiplatformapplication.auth.formatAttempt
 import com.example.multiplatformapplication.navigation.HomeScreenKey
 import com.example.multiplatformapplication.navigation.LocalNavigator
+import com.example.multiplatformapplication.ui.components.JACpotButton
+import com.example.multiplatformapplication.ui.components.JACpotTextField
 
 @Composable
 fun LoginScreen() {
@@ -95,25 +94,20 @@ fun LoginScreen() {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 if (!isLoggedIn) {
-                    TextField(
+                    JACpotTextField(
                         value = username,
                         onValueChange = { username = it },
-                        textStyle = TextStyle(textAlign = TextAlign.Center),
-                        label = {
-                            Text("Please enter your username")
-                        },
+                        label = "Please enter your username",
                         modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    TextField(
+                    JACpotTextField(
                         value = password,
                         onValueChange = { password = it },
-                        textStyle = TextStyle(textAlign = TextAlign.Center),
-                        label = {
-                            Text("Please enter your password")
-                        },
+                        label = "Please enter your password",
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions =
                             KeyboardOptions(
@@ -121,11 +115,13 @@ fun LoginScreen() {
                                 imeAction = ImeAction.Done,
                             ),
                         modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    Button(
+                    JACpotButton(
+                        text = "Log In",
                         onClick = {
                             if (username.isEmpty() || password.isEmpty()) {
                                 errorMessage = "Enter a username and password."
@@ -145,9 +141,7 @@ fun LoginScreen() {
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Log In")
-                    }
+                    )
 
                     if (errorMessage.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(10.dp))
@@ -158,7 +152,8 @@ fun LoginScreen() {
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    Button(
+                    JACpotButton(
+                        text = "Log Out",
                         onClick = {
                             isLoggedIn = false
                             username = ""
@@ -166,9 +161,7 @@ fun LoginScreen() {
                             errorMessage = ""
                         },
                         modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Log Out")
-                    }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))

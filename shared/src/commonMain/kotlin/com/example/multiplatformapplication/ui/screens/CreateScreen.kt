@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.multiplatformapplication.navigation.LocalNavigator
+import com.example.multiplatformapplication.ui.components.ButtonStyle
+import com.example.multiplatformapplication.ui.components.JACpotButton
+import com.example.multiplatformapplication.ui.components.JACpotTextField
 
 // Simple dataclass holding the values inputted by a user which represent an item to be "sold"
 data class Item(
@@ -96,7 +98,7 @@ fun CreateSellItemForm(
         }
 
     Column {
-        Button(onClick = { navigator.pop() }) { Text("Back to Marketplace") }
+        JACpotButton("Back to Marketplace", onClick = { navigator.pop() }, style = ButtonStyle.Outlined)
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(15.dp), // alignment and padding to make everything look nice! Hopefully lol
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -112,30 +114,29 @@ fun CreateSellItemForm(
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
-                    OutlinedTextField(
-                        value = titleInput, // updating the value to the new value from the user
-                        onValueChange = { titleInput = it }, // saving the value inputted from the user
-                        label = { Text("Enter the title of your item") }, // the label telling the user what to input
-                        modifier = Modifier.fillMaxWidth().padding(8.dp), // padding and alignment
-                        maxLines = 2, // the max number of lines the box will expand to
-                        supportingText = { if (titleError) Text(text = "Title cannot be empty", color = Color.Red) },
-                        // the above displays the error message as supporting text if an error is detected when the create button is pressed
+                    JACpotTextField(
+                        value = titleInput,
+                        onValueChange = { titleInput = it },
+                        label = "Enter the title of your item",
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        maxLines = 2,
+                        errorText = if (titleError) "Title cannot be empty" else null,
                     )
-                    OutlinedTextField(
+                    JACpotTextField(
                         value = descInput,
                         onValueChange = { descInput = it },
-                        label = { Text("Enter the description of your item") },
+                        label = "Enter the description of your item",
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
                         maxLines = 4,
-                        supportingText = { if (descError) Text(text = "Description cannot be empty", color = Color.Red) },
+                        errorText = if (descError) "Description cannot be empty" else null,
                     )
-                    OutlinedTextField(
+                    JACpotTextField(
                         value = priceInput,
                         onValueChange = { priceInput = it },
-                        label = { Text("Enter the price of your item") },
+                        label = "Enter the price of your item",
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
                         maxLines = 1,
-                        supportingText = { if (priceError) Text(text = "Price must be a number more than 0", color = Color.Red) },
+                        errorText = if (priceError) "Price must be a number more than 0" else null,
                     )
                     ExposedDropdownMenuBox(
                         expanded = expanded,
@@ -166,7 +167,7 @@ fun CreateSellItemForm(
                             }
                         }
                     }
-                    Button(onClick = {
+                    JACpotButton(text = "Create Item", onClick = {
                         var isValid = true; // reset at the start
 
                         if (titleInput.isEmpty()) { // check if title is empty
@@ -207,9 +208,7 @@ fun CreateSellItemForm(
                             priceInput = ""
                             selectedCategory = ""
                         }
-                    }) {
-                        Text(text = "Create Item")
-                    }
+                    })
                 }
             }
 

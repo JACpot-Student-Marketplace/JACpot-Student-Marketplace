@@ -14,9 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,8 +31,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.example.multiplatformapplication.navigation.CreateScreenKey
 import com.example.multiplatformapplication.navigation.LocalNavigator
+import com.example.multiplatformapplication.ui.components.JACpotButton
+import com.example.multiplatformapplication.ui.components.JACpotTextField
 import com.example.multiplatformapplication.ui.components.ListingCard
-import com.example.multiplatformapplication.ui.components.MarketplaceSearchBar
+import com.example.multiplatformapplication.ui.components.SearchBar
 
 /**
  * One student item for sale. [category] is compared to the selected chip,
@@ -122,12 +122,13 @@ fun MarketplaceScreen(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Marketplace", modifier = Modifier.weight(1f))
-            Button(onClick = { navigator.navigate(CreateScreenKey) }) { Text("Create listing") }
+            JACpotButton("Create listing", onClick = { navigator.navigate(CreateScreenKey) })
         }
 
-        MarketplaceSearchBar(
+        SearchBar(
             query = query,
             onQueryChange = { query = it },
+            placeholder = "Search listings",
             modifier = Modifier.fillMaxWidth(),
         )
 
@@ -144,17 +145,17 @@ fun MarketplaceScreen(
                 )
             }
             if (addingCategory) {
-                OutlinedTextField(
+                JACpotTextField(
                     value = newCategoryName,
                     onValueChange = { newCategoryName = it },
                     modifier = Modifier.width(160.dp),
                     singleLine = true,
-                    placeholder = { Text("Category") },
+                    placeholder = "Category",
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { commitCategory() }),
                 )
             } else {
-                Button(onClick = { addingCategory = true }) { Text("Add category") }
+                JACpotButton("Add category", onClick = { addingCategory = true })
             }
         }
 
