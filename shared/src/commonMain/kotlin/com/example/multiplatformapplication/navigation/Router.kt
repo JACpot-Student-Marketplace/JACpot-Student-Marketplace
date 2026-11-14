@@ -10,6 +10,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.example.multiplatformapplication.model.Request
+import com.example.multiplatformapplication.ui.screens.CreateRequestScreen
 import com.example.multiplatformapplication.ui.screens.CreateSellItemForm
 import com.example.multiplatformapplication.ui.screens.Listing
 import com.example.multiplatformapplication.ui.screens.LoginScreen
@@ -37,6 +39,9 @@ data object ProfileScreenKey : NavKey
 @Serializable
 data object CreateScreenKey : NavKey
 
+@Serializable
+data object CreateRequestScreenKey : NavKey
+
 val backStackConfig =
     SavedStateConfiguration {
         serializersModule =
@@ -48,6 +53,7 @@ val backStackConfig =
                     subclass(RequestsScreenKey::class, RequestsScreenKey.serializer())
                     subclass(ProfileScreenKey::class, ProfileScreenKey.serializer())
                     subclass(CreateScreenKey::class, CreateScreenKey.serializer())
+                    subclass(CreateRequestScreenKey::class, CreateRequestScreenKey.serializer())
                 }
             }
     }
@@ -62,6 +68,7 @@ fun Router() {
     val backStack = rememberNavBackStack(backStackConfig, LoginScreenKey)
     val navigator = remember(backStack) { Navigator(backStack) }
     val createdListings = remember { mutableStateListOf<Listing>() }
+    val createdRequests = remember { mutableStateListOf<Request>() } // Browse Requests will read this
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
         NavDisplay(
@@ -74,7 +81,20 @@ fun Router() {
                     entry<MarketplaceScreenKey> {
                         Shell(MarketplaceScreenKey, navigator) { MarketplaceScreen(createdListings = createdListings) }
                     }
-                    entry<RequestsScreenKey> { Shell(RequestsScreenKey, navigator) { PlaceholderScreen("Requests") } }
+                    entry<RequestsScreenKey> {
+                        Shell(RequestsScreenKey, navigator) {
+                            PlaceholderScreen(
+                                "Requests (${createdRequests.size} posted)",
+                                "Post a request",
+                            ) { navigator.navigate(CreateRequestScreenKey) }
+                        }
+                    }
+                    entry<CreateRequestScreenKey> {
+                        CreateRequestScreen(onSubmit = { request ->
+                            createdRequests.add(request)
+                            navigator.pop()
+                        })
+                    }
                     entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
                     entry<CreateScreenKey> {
                         CreateSellItemForm(onItemCreated = { item ->
