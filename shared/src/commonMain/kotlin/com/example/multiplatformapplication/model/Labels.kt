@@ -27,3 +27,17 @@ fun formatPrice(cents: Long): String {
     val rest = cents % 100
     return if (rest == 0L) "\$$dollars" else "\$$dollars.${rest.toString().padStart(2, '0')}"
 }
+
+fun formatPostedAgo(
+    createdAt: Long,
+    now: Long,
+): String {
+    val minutes = (now - createdAt).coerceAtLeast(0) / 60_000
+    return when {
+        minutes < 1 -> "Just now"
+        minutes < 60 -> "${minutes}m ago"
+        minutes < 60 * 24 -> "${minutes / 60}h ago"
+        minutes < 60 * 24 * 7 -> "${minutes / (60 * 24)}d ago"
+        else -> "${minutes / (60 * 24 * 7)}w ago"
+    }
+}
