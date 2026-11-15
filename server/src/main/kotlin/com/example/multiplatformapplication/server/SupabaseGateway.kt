@@ -20,10 +20,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import java.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.time.Instant
 
 class SupabaseGateway(
     supabaseUrl: String,
@@ -43,30 +43,33 @@ class SupabaseGateway(
 
     suspend fun users(): List<User> {
         val rows: List<UserRow> =
-            http.get("$rest/users") {
-                parameter(
-                    "select",
-                    "id,first_name,last_name,email,profile_photo_url,created_at",
-                )
-            }.body()
+            http
+                .get("$rest/users") {
+                    parameter(
+                        "select",
+                        "id,first_name,last_name,email,profile_photo_url,created_at",
+                    )
+                }.body()
         return rows.map { it.toUser() }
     }
 
     suspend fun listings(): List<Listing> {
         val rows: List<ListingRow> =
-            http.get("$rest/listings") {
-                parameter("select", LISTING_COLUMNS)
-            }.body()
+            http
+                .get("$rest/listings") {
+                    parameter("select", LISTING_COLUMNS)
+                }.body()
         return rows.map { it.toListing() }
     }
 
     suspend fun createListing(listing: NewListing): Listing {
         val rows: List<ListingRow> =
-            http.post("$rest/listings") {
-                header("Prefer", "return=representation")
-                contentType(ContentType.Application.Json)
-                setBody(listing.toInsert())
-            }.body()
+            http
+                .post("$rest/listings") {
+                    header("Prefer", "return=representation")
+                    contentType(ContentType.Application.Json)
+                    setBody(listing.toInsert())
+                }.body()
         return rows.first().toListing()
     }
 }
