@@ -26,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.multiplatformapplication.model.ListingCategory
+import com.example.multiplatformapplication.model.label
 import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
@@ -56,7 +58,7 @@ fun CreateSellItemForm(
     var priceInput by rememberSaveable { mutableStateOf("") }
 
     // The dropdown menu stuff, such as the options, the selected option, and the expanded state bool
-    val categories = listOf("Books", "Clothing", "Electronics", "School Supplies", "Other")
+    val categories = ListingCategory.entries.map { it.label }
     var selectedCategory by rememberSaveable { mutableStateOf("") }
     var expanded by rememberSaveable { mutableStateOf(false) }
 

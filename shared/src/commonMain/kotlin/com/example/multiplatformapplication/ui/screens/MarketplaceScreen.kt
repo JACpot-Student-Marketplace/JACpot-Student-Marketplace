@@ -2,37 +2,42 @@ package com.example.multiplatformapplication.ui.screens
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.example.multiplatformapplication.navigation.CreateScreenKey
+import com.example.multiplatformapplication.model.ItemCondition
+import com.example.multiplatformapplication.model.ListingCategory
+import com.example.multiplatformapplication.model.label
+import com.example.multiplatformapplication.navigation.CreateRequestScreenKey
 import com.example.multiplatformapplication.navigation.LocalNavigator
+import com.example.multiplatformapplication.state.ListingSort
+import com.example.multiplatformapplication.state.LocalListings
+import com.example.multiplatformapplication.state.queryListings
+import com.example.multiplatformapplication.ui.components.ButtonStyle
+import com.example.multiplatformapplication.ui.components.FilterMenu
 import com.example.multiplatformapplication.ui.components.JACpotButton
-import com.example.multiplatformapplication.ui.components.JACpotTextField
 import com.example.multiplatformapplication.ui.components.ListingCard
 import com.example.multiplatformapplication.ui.components.SearchBar
 
@@ -64,116 +69,154 @@ private val sampleListings =
  * so both filters share one source of truth and both survive rotation.
  */
 @Composable
-fun MarketplaceScreen(
-    modifier: Modifier = Modifier,
-    createdListings: List<Listing> = emptyList(),
-) {
+fun MarketplaceScreen(modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.current
-    // rememberSaveable keeps these across rotation. remember would reset them
-    // when the activity is recreated, and the list would jump back to every item.
+    val listings = LocalListings.current
+    var categoryName by rememberSaveable { mutableStateOf<String?>(null) }
+    var conditionName by rememberSaveable { mutableStateOf<String?>(null) }
+    var sortName by rememberSaveable { mutableStateOf(ListingSort.NEWEST.name) }
+    val category = categoryName?.let { ListingCategory.valueOf(it) }
+    val condition = conditionName?.let { ItemCondition.valueOf(it) }
+    val sort = ListingSort.valueOf(sortName)
     var query by rememberSaveable { mutableStateOf("") }
     var selectedCategory by rememberSaveable { mutableStateOf("All") }
 
-    // A plain List inside mutableStateOf is not written into the rotation bundle.
-    // listSaver stores each name and rebuilds the list after the activity is recreated.
-    val categories =
-        rememberSaveable(
-            saver =
-                listSaver<SnapshotStateList<String>, String>(
-                    save = { it.toList() },
-                    restore = { it.toMutableStateList() },
-                ),
-        ) {
-            mutableStateListOf("All", "Textbooks", "Clothes")
-        }
-    var addingCategory by rememberSaveable { mutableStateOf(false) }
-    var newCategoryName by rememberSaveable { mutableStateOf("") }
-
-    // Blank text does not add a chip. Enter appends the name and the plus moves to the end.
-    fun commitCategory() {
-        val trimmed = newCategoryName.trim()
-        if (trimmed.isEmpty()) return
-        categories.add(trimmed)
-        newCategoryName = ""
-        addingCategory = false
+    val active = listings.activeListings
+    val visible = queryListings(active, query, category, condition, sort)
+    val filtersApplied =
+        query.isNotBlank() || category != null || condition != null || sort != ListingSort.NEWEST
+    val resetFilters = {
+        query = ""
+        categoryName = null
+        conditionName = null
+        sortName = ListingSort.NEWEST.name
     }
 
-    // Recomputed on every composition from the fixed catalog. A keystroke or
-    // chip tap changes state, recomposes this function, and produces a new list.
-    val visibleListings =
-        (createdListings + sampleListings).filter { listing ->
-            val matchesCategory = selectedCategory == "All" || listing.category == selectedCategory
-            val matchesQuery =
-                query.isBlank() ||
-                    listing.title.contains(query.trim(), ignoreCase = true)
-            matchesCategory && matchesQuery
-        }
-
-    createdListings.forEach { listing ->
-        if (listing.category !in categories) categories.add(listing.category)
-    }
-
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Marketplace", modifier = Modifier.weight(1f))
-            JACpotButton("Create listing", onClick = { navigator.navigate(CreateScreenKey) })
-        }
-
-        SearchBar(
-            query = query,
-            onQueryChange = { query = it },
-            placeholder = "Search listings",
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    BoxWithConstraints(modifier.fillMaxSize()) {
+        val wide = maxWidth >= 600.dp
+        LazyVerticalGrid(
+            columns = if (wide) GridCells.Adaptive(240.dp) else GridCells.Fixed(1),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(if (wide) 24.dp else 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            categories.forEach { category ->
-                FilterChip(
-                    selected = selectedCategory == category,
-                    onClick = { selectedCategory = category },
-                    label = { Text(category) },
-                )
-            }
-            if (addingCategory) {
-                JACpotTextField(
-                    value = newCategoryName,
-                    onValueChange = { newCategoryName = it },
-                    modifier = Modifier.width(160.dp),
-                    singleLine = true,
-                    placeholder = "Category",
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { commitCategory() }),
-                )
-            } else {
-                JACpotButton("Add category", onClick = { addingCategory = true })
-            }
-        }
-
-        if (visibleListings.isEmpty()) {
-            Text("No listings match your search.")
-        } else {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(bottom = 16.dp),
-            ) {
-                items(visibleListings, key = { it.id }) { listing ->
-                    ListingCard(
-                        listing = listing,
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SearchBar(
+                        query = query,
+                        onQueryChange = { query = it },
+                        placeholder = "Search for your desired item",
                         modifier = Modifier.fillMaxWidth(),
+                    )
+                    CategoryChips(selected = category, onSelect = { categoryName = it?.name })
+
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        FilterMenu(
+                            label = "Condition: ${condition?.label ?: "Any"}",
+                            options = listOf(null) + ItemCondition.entries,
+                            optionLabel = { it?.label ?: "Any condition" },
+                            onSelect = { conditionName = it?.name },
+                        )
+                        FilterMenu(
+                            label = sort.label,
+                            options = ListingSort.entries,
+                            optionLabel = { it?.label ?: "Newest first" },
+                            onSelect = { sortName = it.name },
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "${visible.size} of ${active.size} listings",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        if (filtersApplied) {
+                            JACpotButton("Reset filters", onClick = resetFilters, style = ButtonStyle.Text)
+                        }
+                    }
+                }
+            }
+            if (active.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    EmptyFeed("No listings yet", "Be the first to sell something to another JAC student.")
+                }
+            } else if (visible.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    EmptyFeed(
+                        title = "No matching listings",
+                        message = "Try another search, or post a request so sellers can find you.",
+                        actionText = "Post a request",
+                        onAction = { navigator.navigate(CreateRequestScreenKey) },
                     )
                 }
             }
+            items(visible, key = { it.id }) { listing ->
+                ListingCard(
+                    listing = listing,
+                    onClick = { },
+                    photoAspectRatio = if (wide) 1f else 4f / 3f,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MarketplaceHeader(onSell: () -> Unit) {
+    FlowRow(
+        Modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("Browse Items", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Text("Marketplace", style = MaterialTheme.typography.headlineMedium)
+            Text(
+                "Find what you need from other JAC students!",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        JACpotButton("+ Sell an item", onClick = onSell)
+    }
+}
+
+@Composable
+private fun CategoryChips(
+    selected: ListingCategory?,
+    onSelect: (ListingCategory?) -> Unit,
+) {
+    Row(
+        Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        FilterChip(selected = selected == null, onClick = { onSelect(null) }, label = { Text("All items") })
+        ListingCategory.entries.forEach { category ->
+            FilterChip(
+                selected = selected == category,
+                onClick = { onSelect(category) },
+                label = { Text(category.label) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyFeed(
+    title: String,
+    message: String,
+    actionText: String? = null,
+    onAction: () -> Unit = {},
+) {
+    Surface(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Column(Modifier.padding(32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(title, style = MaterialTheme.typography.titleLarge)
+            Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (actionText != null) JACpotButton(actionText, onClick = onAction, style = ButtonStyle.Outlined)
         }
     }
 }
