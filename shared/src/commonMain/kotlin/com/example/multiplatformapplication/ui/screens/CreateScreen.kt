@@ -31,6 +31,7 @@ import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.JACpotTextField
+import com.example.multiplatformapplication.model.ListingCategory
 
 // Simple dataclass holding the values inputted by a user which represent an item to be "sold"
 data class Item(
@@ -57,7 +58,7 @@ fun CreateSellItemForm(
     var priceInput by rememberSaveable { mutableStateOf("") }
 
     // The dropdown menu stuff, such as the options, the selected option, and the expanded state bool
-    val categories = listOf("Books", "Clothing", "Electronics", "School Supplies", "Other")
+    val categories = ListingCategory.entries.map { it.label }
     var selectedCategory by rememberSaveable { mutableStateOf("") }
     var expanded by rememberSaveable { mutableStateOf(false) }
 

@@ -37,7 +37,7 @@ fun ListingCard(
             )
             PriceBadge(
                 formatPrice(listing.priceCents),
-                modifier.align(Alignment.TopStart).padding(12.dp),
+                Modifier.align(Alignment.TopStart).padding(12.dp),
             )
         }
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
