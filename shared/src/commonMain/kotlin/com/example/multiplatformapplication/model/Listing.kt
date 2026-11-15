@@ -20,3 +20,17 @@ data class Listing(
     val createdAt: Long,
     val updatedAt: Long,
 )
+
+@Serializable
+data class NewListing(
+    val ownerId: String,
+    val title: String,
+    val description: String,
+    val category: ListingCategory,
+    val condition: ItemCondition,
+    val priceCents: Long,
+    val courseCode: String? = null,
+    val author: String? = null,
+    val releaseDate: String? = null,
+    val accessCodeUsed: Boolean? = null,
+)
