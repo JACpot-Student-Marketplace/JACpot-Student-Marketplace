@@ -106,7 +106,7 @@ fun Router() {
                                 title = item.title,
                                 description = item.description,
                                 category = ListingCategory.entries.first { it.label == item.category },
-                                //Another story changes this later on
+                                // Another story changes this later on
                                 condition = ItemCondition.GOOD,
                                 priceCents = (item.price * 100).roundToLong(),
                             )

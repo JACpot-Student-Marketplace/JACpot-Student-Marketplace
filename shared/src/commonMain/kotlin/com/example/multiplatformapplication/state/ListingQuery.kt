@@ -24,12 +24,12 @@ fun queryListings(
         listings.filter { listing ->
             val matchesSearch =
                 term.isEmpty() ||
-                        listing.title.contains(term, ignoreCase = true) ||
-                        listing.description.contains(term, ignoreCase = true) ||
-                        listing.courseCode?.contains(term, ignoreCase = true) == true
+                    listing.title.contains(term, ignoreCase = true) ||
+                    listing.description.contains(term, ignoreCase = true) ||
+                    listing.courseCode?.contains(term, ignoreCase = true) == true
             matchesSearch &&
-                    (category == null || listing.category == category) &&
-                    (condition == null || listing.condition == condition)
+                (category == null || listing.category == category) &&
+                (condition == null || listing.condition == condition)
         }
     val comparator =
         when (sort) {

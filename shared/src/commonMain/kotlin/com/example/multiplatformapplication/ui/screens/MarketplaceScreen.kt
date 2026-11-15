@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -32,7 +31,6 @@ import com.example.multiplatformapplication.model.ItemCondition
 import com.example.multiplatformapplication.model.ListingCategory
 import com.example.multiplatformapplication.model.label
 import com.example.multiplatformapplication.navigation.CreateRequestScreenKey
-import com.example.multiplatformapplication.navigation.CreateScreenKey
 import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.state.ListingSort
 import com.example.multiplatformapplication.state.LocalListings
@@ -42,7 +40,6 @@ import com.example.multiplatformapplication.ui.components.FilterMenu
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.ListingCard
 import com.example.multiplatformapplication.ui.components.SearchBar
-import multiplatformapplication.shared.generated.resources.Res
 
 /**
  * One student item for sale. [category] is compared to the selected chip,
@@ -72,9 +69,7 @@ private val sampleListings =
  * so both filters share one source of truth and both survive rotation.
  */
 @Composable
-fun MarketplaceScreen(
-    modifier: Modifier = Modifier
-) {
+fun MarketplaceScreen(modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.current
     val listings = LocalListings.current
     var categoryName by rememberSaveable { mutableStateOf<String?>(null) }
@@ -190,40 +185,38 @@ private fun MarketplaceHeader(onSell: () -> Unit) {
     }
 }
 
-    @Composable
-    private fun CategoryChips(
-        selected: ListingCategory?,
-        onSelect: (ListingCategory?) -> Unit,
+@Composable
+private fun CategoryChips(
+    selected: ListingCategory?,
+    onSelect: (ListingCategory?) -> Unit,
+) {
+    Row(
+        Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Row(
-            Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            FilterChip(selected = selected == null, onClick = { onSelect(null)}, label = { Text("All items") })
-            ListingCategory.entries.forEach { category ->
-                FilterChip(
-                    selected = selected == category,
-                    onClick = { onSelect(category) },
-                    label = { Text(category.label) },
-                )
-            }
+        FilterChip(selected = selected == null, onClick = { onSelect(null) }, label = { Text("All items") })
+        ListingCategory.entries.forEach { category ->
+            FilterChip(
+                selected = selected == category,
+                onClick = { onSelect(category) },
+                label = { Text(category.label) },
+            )
         }
     }
+}
 
-    @Composable
-    private fun EmptyFeed(
-        title: String,
-        message: String,
-        actionText: String? = null,
-        onAction: () -> Unit = {},
-    ) {
-        Surface(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainerLow)
-        {
-            Column(Modifier.padding(32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(title, style = MaterialTheme.typography.titleLarge)
-                Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                if (actionText != null) JACpotButton(actionText, onClick = onAction, style = ButtonStyle.Outlined)
-            }
+@Composable
+private fun EmptyFeed(
+    title: String,
+    message: String,
+    actionText: String? = null,
+    onAction: () -> Unit = {},
+) {
+    Surface(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Column(Modifier.padding(32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(title, style = MaterialTheme.typography.titleLarge)
+            Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (actionText != null) JACpotButton(actionText, onClick = onAction, style = ButtonStyle.Outlined)
         }
     }
-
+}

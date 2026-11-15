@@ -19,7 +19,6 @@ import com.example.multiplatformapplication.model.formatPrice
 import com.example.multiplatformapplication.model.label
 import kotlin.time.Clock
 
-
 @Composable
 fun ListingCard(
     listing: Listing,
@@ -27,7 +26,7 @@ fun ListingCard(
     modifier: Modifier = Modifier,
     photoAspectRatio: Float = 1f,
 ) {
-    val now = Clock.System.now().toEpochMilliseconds() //get the current time
+    val now = Clock.System.now().toEpochMilliseconds() // get the current time
 
     Card(onClick = onClick, modifier = modifier) {
         Box {
@@ -36,19 +35,20 @@ fun ListingCard(
                 description = listing.title,
                 aspectRatio = photoAspectRatio,
             )
-            PriceBadge(formatPrice(listing.priceCents),
-            modifier.align(Alignment.TopStart).padding(12.dp))
+            PriceBadge(
+                formatPrice(listing.priceCents),
+                modifier.align(Alignment.TopStart).padding(12.dp),
+            )
         }
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-          Text(
-              listing.title,
-              style = MaterialTheme.typography.titleMedium,
-              maxLines = 2,
-              overflow = TextOverflow.Ellipsis,
-          )
+            Text(
+                listing.title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
             Text(
                 listOfNotNull(listing.condition.label, listing.courseCode).joinToString(" • "),
-
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -75,7 +75,10 @@ private fun PriceBadge(
         color = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary,
     ) {
-        Text(price, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.titleMedium)
+        Text(
+            price,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.titleMedium,
+        )
     }
 }
