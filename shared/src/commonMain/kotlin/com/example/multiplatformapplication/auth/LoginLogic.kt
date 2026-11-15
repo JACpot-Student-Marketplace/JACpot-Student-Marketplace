@@ -1,27 +1,22 @@
 package com.example.multiplatformapplication.auth
 
-data class User(
-    val username: String,
+data class DemoAccount(
+    val email: String,
     val password: String,
 )
 
-val users =
+val demoAccounts =
     listOf(
-        User("Luca", "Luca123"),
-        User("Jaden", "Jaden123"),
-        User("Chris", "Chris123"),
-        User("Talib", "Talib123"),
+        User("luca@johnabbottcollege.net", "Luca123"),
+        User("jaden@johnabbottcollege.net", "Jaden123"),
+        User("chris@johnabbottcollege.net", "Chris123"),
+        User("talib@johnabbottcollege.net", "Talib123"),
     )
 
 fun authenticate(
-    username: String,
+    email: String,
     password: String,
 ): Boolean {
-    val match = users.find { it.username == username } ?: return false
+    val match = demoAccounts.find { it.username == username } ?: return false
     return match.password == password
 }
-
-fun formatAttempt(
-    username: String,
-    wasSuccessful: Boolean,
-): String = "$username - ${if (wasSuccessful) "success" else "failed"}"
