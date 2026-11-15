@@ -30,6 +30,8 @@ import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.JACpotTextField
+import com.example.multiplatformapplication.model.ListingCategory
+import com.example.multiplatformapplication.model.label
 
 // Simple dataclass holding the values inputted by a user which represent an item to be "sold"
 data class Item(

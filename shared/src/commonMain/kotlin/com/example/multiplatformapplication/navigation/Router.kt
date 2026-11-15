@@ -10,16 +10,20 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.example.multiplatformapplication.model.ItemCondition
+import com.example.multiplatformapplication.model.ListingCategory
 import com.example.multiplatformapplication.model.Request
+import com.example.multiplatformapplication.model.label
+import com.example.multiplatformapplication.state.LocalListings
 import com.example.multiplatformapplication.ui.screens.CreateRequestScreen
 import com.example.multiplatformapplication.ui.screens.CreateSellItemForm
-import com.example.multiplatformapplication.ui.screens.Listing
 import com.example.multiplatformapplication.ui.screens.LoginScreen
 import com.example.multiplatformapplication.ui.screens.MarketplaceScreen
 import com.example.multiplatformapplication.ui.screens.PlaceholderScreen
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+import kotlin.math.roundToLong
 
 @Serializable
 data object LoginScreenKey : NavKey
@@ -67,7 +71,7 @@ val LocalNavigator =
 fun Router() {
     val backStack = rememberNavBackStack(backStackConfig, LoginScreenKey)
     val navigator = remember(backStack) { Navigator(backStack) }
-    val createdListings = remember { mutableStateListOf<Listing>() }
+    val listings = LocalListings.current
     val createdRequests = remember { mutableStateListOf<Request>() } // Browse Requests will read this
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
@@ -79,7 +83,7 @@ fun Router() {
                     entry<LoginScreenKey> { LoginScreen() }
                     entry<HomeScreenKey> { Shell(HomeScreenKey, navigator) { PlaceholderScreen("Home") } }
                     entry<MarketplaceScreenKey> {
-                        Shell(MarketplaceScreenKey, navigator) { MarketplaceScreen(createdListings = createdListings) }
+                        Shell(MarketplaceScreenKey, navigator) { MarketplaceScreen() }
                     }
                     entry<RequestsScreenKey> {
                         Shell(RequestsScreenKey, navigator) {
@@ -98,14 +102,13 @@ fun Router() {
                     entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
                     entry<CreateScreenKey> {
                         CreateSellItemForm(onItemCreated = { item ->
-                            createdListings.add(
-                                Listing(
-                                    id = 1000 + createdListings.size,
-                                    title = item.title,
-                                    price = "\$${item.price}",
-                                    category = item.category,
-                                    seller = "You",
-                                ),
+                            listings.addListing(
+                                title = item.title,
+                                description = item.description,
+                                category = ListingCategory.entries.first { it.label == item.category },
+                                //Another story changes this later on
+                                condition = ItemCondition.GOOD,
+                                priceCents = (item.price * 100).roundToLong(),
                             )
                             navigator.pop()
                         })

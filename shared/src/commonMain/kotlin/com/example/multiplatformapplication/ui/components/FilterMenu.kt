@@ -18,16 +18,15 @@ import androidx.compose.ui.unit.dp
  * A generic dropdown filter menu that displays the current choice and exposes options.
  */
 @Composable
-fun <T> ListingFilterMenu(
+fun <T> FilterMenu(
     label: String,
-    currentSelection: T?,
     options: List<T>,
     optionLabel: (T?) -> String,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val displayValue = optionLabel(currentSelection)
+    //val displayValue = optionLabel(currentSelection)
 
     Box(modifier) {
         JACpotButton(label, onClick = { expanded = true }, style = ButtonStyle.Outlined)
