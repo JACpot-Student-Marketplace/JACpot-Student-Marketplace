@@ -26,12 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.multiplatformapplication.model.ListingCategory
 import com.example.multiplatformapplication.model.label
 import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.JACpotTextField
-import com.example.multiplatformapplication.model.ListingCategory
 
 // Simple dataclass holding the values inputted by a user which represent an item to be "sold"
 data class Item(
