@@ -24,6 +24,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlin.math.roundToLong
+import com.example.multiplatformapplication.model.label
+import com.example.multiplatformapplication.state.LocalListings
+import kotlin.math.roundToLong
 
 @Serializable
 data object LoginScreenKey : NavKey
@@ -71,7 +74,6 @@ val LocalNavigator =
 fun Router() {
     val backStack = rememberNavBackStack(backStackConfig, LoginScreenKey)
     val navigator = remember(backStack) { Navigator(backStack) }
-    val listings = LocalListings.current
     val createdRequests = remember { mutableStateListOf<Request>() } // Browse Requests will read this
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
@@ -101,16 +103,9 @@ fun Router() {
                     }
                     entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
                     entry<CreateScreenKey> {
-                        CreateSellItemForm(onItemCreated = { item ->
-                            listings.addListing(
-                                title = item.title,
-                                description = item.description,
-                                category = ListingCategory.entries.first { it.label == item.category },
-                                // Another story changes this later on
-                                condition = ItemCondition.GOOD,
-                                priceCents = (item.price * 100).roundToLong(),
-                            )
-                            navigator.pop()
+                        CreateSellItemForm(onCreated = {
+                            navigator.popUntil(HomeScreenKey)
+                            navigator.navigate(MarketplaceScreenKey)
                         })
                     }
                 },
