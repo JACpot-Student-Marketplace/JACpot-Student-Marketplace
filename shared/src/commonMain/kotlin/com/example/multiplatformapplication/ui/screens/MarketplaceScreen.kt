@@ -40,6 +40,9 @@ import com.example.multiplatformapplication.ui.components.FilterMenu
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.ListingCard
 import com.example.multiplatformapplication.ui.components.SearchBar
+import com.example.multiplatformapplication.model.ListingStatus
+import com.example.multiplatformapplication.navigation.CreateScreenKey
+import com.example.multiplatformapplication.ui.components.ListingDetailsDialog
 
 /**
  * One student item for sale. [category] is compared to the selected chip,
@@ -79,7 +82,6 @@ fun MarketplaceScreen(modifier: Modifier = Modifier) {
     val condition = conditionName?.let { ItemCondition.valueOf(it) }
     val sort = ListingSort.valueOf(sortName)
     var query by rememberSaveable { mutableStateOf("") }
-    var selectedCategory by rememberSaveable { mutableStateOf("All") }
 
     val active = listings.activeListings
     val visible = queryListings(active, query, category, condition, sort)
@@ -92,6 +94,8 @@ fun MarketplaceScreen(modifier: Modifier = Modifier) {
         sortName = ListingSort.NEWEST.name
     }
 
+    var openListingId by rememberSaveable { mutableStateOf<String?>(null) }
+
     BoxWithConstraints(modifier.fillMaxSize()) {
         val wide = maxWidth >= 600.dp
         LazyVerticalGrid(
@@ -101,6 +105,9 @@ fun MarketplaceScreen(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                MarketplaceHeader(onSell = { navigator.navigate(CreateScreenKey) })
+            }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SearchBar(
@@ -157,18 +164,39 @@ fun MarketplaceScreen(modifier: Modifier = Modifier) {
             items(visible, key = { it.id }) { listing ->
                 ListingCard(
                     listing = listing,
-                    onClick = { },
+                    onClick = { openListingId = listing.id },
                     photoAspectRatio = if (wide) 1f else 4f / 3f,
                 )
             }
         }
+    }
+
+    val openListing =
+        openListingId
+            ?.let { listings.findListing(it) }
+            ?.takeIf { it.status == ListingStatus.ACTIVE }
+    if (openListing != null) {
+        ListingDetailsDialog(
+            listing = openListing,
+            seller = listings.seller(openListing),
+            isOwner = listings.isOwner(openListing),
+            onDismiss = { openListingId = null },
+            onMarkSold = {
+                listings.markSold(openListing.id)
+                openListingId = null
+            },
+            onDelete = {
+                listings.deleteListing(openListing.id)
+                openListingId = null
+            },
+        )
     }
 }
 
 @Composable
 private fun MarketplaceHeader(onSell: () -> Unit) {
     FlowRow(
-        Modifier.fillMaxSize(),
+        Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
