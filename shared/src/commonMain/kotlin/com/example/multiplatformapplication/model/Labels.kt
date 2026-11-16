@@ -41,3 +41,12 @@ fun formatPostedAgo(
         else -> "${minutes / (60 * 24 * 7)}w ago"
     }
 }
+
+val RequestStatus.label: String
+    get() =
+        when (this) {
+            RequestStatus.ACTIVE -> "Active"
+            RequestStatus.CLOSED -> "Closed"
+            RequestStatus.FULFILLED -> "Fulfilled"
+            RequestStatus.EXPIRED -> "Expired"
+        }
