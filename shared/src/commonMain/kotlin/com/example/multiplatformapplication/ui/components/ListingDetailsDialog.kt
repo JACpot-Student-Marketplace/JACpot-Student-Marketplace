@@ -1,10 +1,16 @@
 package com.example.multiplatformapplication.ui.components
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -14,9 +20,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -124,12 +132,8 @@ private fun ListingInformation(
         )
 
     Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        ListingPhoto(
-            url = listing.photoUrls.firstOrNull(),
-            description = "Photo of ${listing.title}",
-            modifier = Modifier.clip(MaterialTheme.shapes.medium),
-            aspectRatio = 4f / 3f,
-        )
+        PhotoGallery(listing)
+
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -179,6 +183,56 @@ private fun ListingInformation(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+@Composable
+private fun PhotoGallery(listing: Listing) {
+    val photos = listing.photoUrls
+    var selected by rememberSaveable(listing.id) { mutableIntStateOf(0) }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Box {
+            ListingPhoto(
+                url = photos.getOrNull(selected),
+                description = "Photo ${selected + 1} of ${listing.title}",
+                modifier = Modifier.clip(MaterialTheme.shapes.medium),
+                aspectRatio = 4f / 3f,
+            )
+            if (photos.size > 1) {
+                Surface(
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp),
+                    shape = MaterialTheme.shapes.small,
+                    color = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ) {
+                    Text(
+                        "${selected + 1} / ${photos.size}",
+                        Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+            }
+        }
+        if (photos.size > 1) {
+            Row(
+                Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                photos.forEachIndexed { index, url ->
+                    val outline = if (index == selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                    ListingPhoto(
+                        url = url,
+                        description = "Show photo ${index + 1}",
+                        modifier =
+                            Modifier
+                                .width(64.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .border(2.dp, outline, MaterialTheme.shapes.small)
+                                .clickable { selected = index },
+                    )
+                }
+            }
         }
     }
 }

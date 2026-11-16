@@ -11,10 +11,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import com.example.multiplatformapplication.data.mockRequests
-import com.example.multiplatformapplication.model.ItemCondition
-import com.example.multiplatformapplication.model.ListingCategory
 import com.example.multiplatformapplication.model.Request
-import com.example.multiplatformapplication.model.label
 import com.example.multiplatformapplication.state.LocalListings
 import com.example.multiplatformapplication.ui.screens.CreateAccountScreen
 import com.example.multiplatformapplication.ui.screens.CreateRequestScreen
@@ -26,7 +23,6 @@ import com.example.multiplatformapplication.ui.screens.RequestsScreen
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlin.math.roundToLong
 import kotlin.time.Clock
 
 @Serializable
@@ -113,16 +109,9 @@ fun Router() {
                     }
                     entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
                     entry<CreateScreenKey> {
-                        CreateSellItemForm(onItemCreated = { item ->
-                            listings.addListing(
-                                title = item.title,
-                                description = item.description,
-                                category = ListingCategory.entries.first { it.label == item.category },
-                                // Another story changes this later on
-                                condition = ItemCondition.GOOD,
-                                priceCents = (item.price * 100).roundToLong(),
-                            )
-                            navigator.pop()
+                        CreateSellItemForm(onCreated = {
+                            navigator.popUntil(HomeScreenKey)
+                            navigator.navigate(MarketplaceScreenKey)
                         })
                     }
                 },

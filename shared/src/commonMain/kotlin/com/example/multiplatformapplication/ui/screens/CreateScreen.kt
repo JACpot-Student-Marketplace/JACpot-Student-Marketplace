@@ -2,243 +2,214 @@ package com.example.multiplatformapplication.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.multiplatformapplication.model.ItemCondition
 import com.example.multiplatformapplication.model.ListingCategory
 import com.example.multiplatformapplication.model.label
 import com.example.multiplatformapplication.navigation.LocalNavigator
+import com.example.multiplatformapplication.state.LocalListings
 import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
+import com.example.multiplatformapplication.ui.components.JACpotDropdown
 import com.example.multiplatformapplication.ui.components.JACpotTextField
 
-// Simple dataclass holding the values inputted by a user which represent an item to be "sold"
-data class Item(
-    val title: String,
-    val description: String,
-    val price: Double,
-    val category: String,
-)
+// First entry of the optional dropdowns: picking it clears the choice.
+private const val NONE = "—"
+private const val ACCESS_USED = "Used"
+private const val ACCESS_UNUSED = "Not used"
 
-// /This function is the main screen manager, it handles all the creation of the ui, allowing for user inputs, and updating it
-// /The function also allows for the creation of Items which are then added to a list of other items. This list is then displayed to the user.
-// /Validation and screen rotation is also handled here, ensuring the user has a smooth experience.
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Create Listing form. Fields are saveable so a rotation keeps what was typed; errors appear after the
+ * first Post press and disappear as each field is fixed. Book fields only show for Textbooks.
+ * A valid post is saved through the shared ViewModel, then [onCreated] tells Router to leave the form.
+ */
 @Composable
 fun CreateSellItemForm(
     modifier: Modifier = Modifier,
-    onItemCreated: (Item) -> Unit = {},
+    onCreated: () -> Unit = {},
 ) {
     val navigator = LocalNavigator.current
-
-    // The saved inputs from the user, using rememberSaveable to ensure they remain on screen rotation
-    var titleInput by rememberSaveable { mutableStateOf("") }
-    var descInput by rememberSaveable { mutableStateOf("") }
-    var priceInput by rememberSaveable { mutableStateOf("") }
-
-    // The dropdown menu stuff, such as the options, the selected option, and the expanded state bool
-    val categories = ListingCategory.entries.map { it.label }
+    val listings = LocalListings.current
+    var title by rememberSaveable { mutableStateOf("") }
+    var description by rememberSaveable { mutableStateOf("") }
+    var price by rememberSaveable { mutableStateOf("") }
     var selectedCategory by rememberSaveable { mutableStateOf("") }
-    var expanded by rememberSaveable { mutableStateOf(false) }
+    var selectedCondition by rememberSaveable { mutableStateOf("") }
+    var courseCode by rememberSaveable { mutableStateOf("") }
+    var author by rememberSaveable { mutableStateOf("") }
+    var releaseYear by rememberSaveable { mutableStateOf<Int?>(null) }
+    var accessCodeUsed by rememberSaveable { mutableStateOf<Boolean?>(null) }
+    var photos by rememberSaveable { mutableStateOf("") }
+    var submitted by rememberSaveable { mutableStateOf(false) }
 
-    // The bools holding the error states for each input
-    var titleError by rememberSaveable { mutableStateOf(false) }
-    var descError by rememberSaveable { mutableStateOf(false) }
-    var priceError by rememberSaveable { mutableStateOf(false) }
-    var categoryError by rememberSaveable { mutableStateOf(false) }
+    val categories = ListingCategory.entries.map { it.label }
+    val isTextbook = selectedCategory == ListingCategory.TEXTBOOKS.label
 
-    val itemList =
-        rememberSaveable(
-            saver =
-                listSaver(
-                    save = { stateList ->
-                        // triggers before the screen is reset/rotated
-                        stateList.flatMap {
-                            listOf(it.title, it.description, it.price, it.category)
-                        }
-                    },
-                    restore = { savedList ->
-                        // this triggers once the rotation is done
-                        val restoredList = mutableStateListOf<Item>()
-                        // Each item occupies four consecutive saved values.
-                        for (i in savedList.indices step 4) {
-                            restoredList.add(
-                                Item(
-                                    title = savedList[i] as String,
-                                    description = savedList[i + 1] as String,
-                                    price = savedList[i + 2] as Double,
-                                    category = savedList[i + 3] as String,
-                                ),
-                            )
-                        }
-                        restoredList
-                    },
-                ),
-        ) {
-            mutableStateListOf<Item>()
-        }
+    // Re-checked on every change once Post was pressed, so errors vanish as soon as the input is fixed.
+    fun check() = validateListingForm(title, description, price, selectedCategory, selectedCondition, photos)
+    val errors = if (submitted) check() else ListingFormErrors()
 
-    Column {
+    Column(
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
         JACpotButton("Back to Marketplace", onClick = { navigator.pop() }, style = ButtonStyle.Outlined)
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(15.dp), // alignment and padding to make everything look nice! Hopefully lol
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            item {
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(top = 14.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = "Fill out your item's information below", // simple title message to the user, using a text style
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    JACpotTextField(
-                        value = titleInput,
-                        onValueChange = { titleInput = it },
-                        label = "Enter the title of your item",
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                        maxLines = 2,
-                        errorText = if (titleError) "Title cannot be empty" else null,
-                    )
-                    JACpotTextField(
-                        value = descInput,
-                        onValueChange = { descInput = it },
-                        label = "Enter the description of your item",
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                        maxLines = 4,
-                        errorText = if (descError) "Description cannot be empty" else null,
-                    )
-                    JACpotTextField(
-                        value = priceInput,
-                        onValueChange = { priceInput = it },
-                        label = "Enter the price of your item",
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                        maxLines = 1,
-                        errorText = if (priceError) "Price must be a number more than 0" else null,
-                    )
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                    ) {
-                        OutlinedTextField(
-                            modifier = Modifier.menuAnchor(),
-                            value = selectedCategory,
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            supportingText = { if (categoryError) Text(text = "Title cannot be empty", color = Color.Red) },
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }, // updating the expanded state
-                        ) {
-                            categories.forEach { category ->
-                                // go over each option from the list of categories
-                                DropdownMenuItem(
-                                    text = { Text(text = category) },
-                                    onClick = {
-                                        selectedCategory = category
-                                        expanded = false
-                                    }, // saving the choice selected and updating expanded back down to false
-                                )
+        Text("Post a listing", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "Fill out your item's details so students can find and buy it.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        JACpotTextField(
+            value = title,
+            onValueChange = { title = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Item title",
+            maxLines = 2,
+            errorText = errors.title,
+        )
+        JACpotTextField(
+            value = description,
+            onValueChange = { description = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Description",
+            maxLines = 4,
+            errorText = errors.description,
+        )
+        JACpotTextField(
+            value = price,
+            onValueChange = { price = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Price (CAD)",
+            singleLine = true,
+            errorText = errors.price,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        )
+        JACpotDropdown(
+            label = "Category",
+            options = categories,
+            selected = selectedCategory,
+            onSelect = { selectedCategory = it },
+            modifier = Modifier.fillMaxWidth(),
+            errorText = errors.category,
+        )
+        JACpotDropdown(
+            label = "Condition",
+            options = ItemCondition.entries.map { it.label },
+            selected = selectedCondition,
+            onSelect = { selectedCondition = it },
+            modifier = Modifier.fillMaxWidth(),
+            errorText = errors.condition,
+        )
+        JACpotTextField(
+            value = courseCode,
+            onValueChange = { courseCode = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Course code (optional)",
+            placeholder = "e.g. 201-NYA-05",
+            singleLine = true,
+        )
+
+        // Only textbooks get book fields, matching the listings_book_details database rule.
+        if (isTextbook) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Text("Book details", style = MaterialTheme.typography.titleMedium)
+            JACpotTextField(
+                value = author,
+                onValueChange = { author = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = "Author (optional)",
+                singleLine = true,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val thisYear = currentYear() // Luca's helper in DateUtils.kt
+                JACpotDropdown(
+                    label = "Release year",
+                    options = listOf(NONE) + (thisYear downTo 1980).map { it.toString() },
+                    selected = releaseYear?.toString() ?: "",
+                    onSelect = { releaseYear = it.toIntOrNull() },
+                    modifier = Modifier.weight(1f),
+                )
+                JACpotDropdown(
+                    label = "Online access code",
+                    options = listOf(NONE, ACCESS_USED, ACCESS_UNUSED),
+                    selected =
+                        when (accessCodeUsed) {
+                            true -> ACCESS_USED
+                            false -> ACCESS_UNUSED
+                            null -> ""
+                        },
+                    onSelect = { picked ->
+                        accessCodeUsed =
+                            when (picked) {
+                                ACCESS_USED -> true
+                                ACCESS_UNUSED -> false
+                                else -> null
                             }
-                        }
-                    }
-                    JACpotButton(text = "Create Item", onClick = {
-                        var isValid = true; // reset at the start
-
-                        if (titleInput.isEmpty()) { // check if title is empty
-                            isValid = false; // if so set isvalid to false so we dont create the item
-                            titleError = true; // and set title error to true so that the user knows whats wrong
-                        } else { // this means the title is valid
-                            titleError = false; // so we can reset the error to false!
-                        }
-
-                        if (descInput.isEmpty()) {
-                            isValid = false
-                            descError = true
-                        } else {
-                            descError = false
-                        }
-
-                        // The below checks if the price is a number and more than 0 as well as empty
-                        if (priceInput.isEmpty() || priceInput.toDoubleOrNull() == null || priceInput.toDouble() <= 0) {
-                            isValid = false
-                            priceError = true
-                        } else {
-                            priceError = false
-                        }
-
-                        if (selectedCategory.isEmpty()) {
-                            isValid = false
-                            categoryError = true
-                        } else {
-                            categoryError = false
-                        }
-
-                        if (isValid) {
-                            val newItem = Item(titleInput, descInput, priceInput.toDouble(), selectedCategory)
-                            itemList.add(newItem)
-                            onItemCreated(newItem)
-                            titleInput = ""
-                            descInput = ""
-                            priceInput = ""
-                            selectedCategory = ""
-                        }
-                    })
-                }
-            }
-
-            if (itemList.isNotEmpty()) {
-                item {
-                    Text(
-                        text = "Recently Created Items",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            }
-
-            items(itemList) { item ->
-                // for each of the items in the list, display the item using the card
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                    ) {
-                        Text(text = "Title: ${item.title}")
-                        Text(text = "Description: ${item.description}")
-                        Text(text = "Price: $${item.price}")
-                        Text(text = "Category: ${item.category}")
-                    }
-                }
+                    },
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
+
+        // shortcut: photo links stand in for uploads until Supabase storage is connected.
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        JACpotTextField(
+            value = photos,
+            onValueChange = { photos = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Photo links (optional)",
+            maxLines = 5,
+            errorText = errors.photos,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+        )
+        Text(
+            "One link per line, up to 5. The first one is the cover.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        JACpotButton(
+            text = "Post listing",
+            onClick = {
+                submitted = true
+                if (!check().any) {
+                    // The ViewModel sets the id, owner and timestamps.
+                    listings.addListing(
+                        title = title.trim(),
+                        description = description.trim(),
+                        category = ListingCategory.entries.first { it.label == selectedCategory },
+                        condition = ItemCondition.entries.first { it.label == selectedCondition },
+                        priceCents = requireNotNull(parseBudgetCents(price)),
+                        courseCode = courseCode.trim().ifBlank { null },
+                        // Book fields are saved only for textbooks, even if typed before switching category.
+                        author = author.trim().ifBlank { null }.takeIf { isTextbook },
+                        releaseDate = releaseYear?.let { "$it-01-01" }.takeIf { isTextbook },
+                        accessCodeUsed = accessCodeUsed.takeIf { isTextbook },
+                        photoUrls = parsePhotoUrls(photos),
+                    )
+                    onCreated()
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
