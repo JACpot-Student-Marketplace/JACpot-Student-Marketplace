@@ -81,6 +81,22 @@ class InMemoryStudentStore : StudentStore {
             val student = students.find { it.user.id == session.userId } ?: return null
             StudentPrincipal(userId = student.user.id, user = student.user)
         }
+
+    override suspend fun updatePassword(
+        userId: String,
+        passwordHash: String,
+    ) {
+        synchronized(lock) {
+            val index = students.indexOfFirst { it.user.id == userId }
+            if (index >= 0) students[index] = students[index].copy(passwordHash = passwordHash)
+        }
+    }
+
+    override suspend fun deleteSession(tokenHash: String) {
+        synchronized(lock) {
+            sessions.removeAll { it.tokenHash == tokenHash }
+        }
+    }
 }
 
 data class StoredSession(

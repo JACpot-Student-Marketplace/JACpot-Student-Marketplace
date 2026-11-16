@@ -42,4 +42,11 @@ interface StudentStore {
         tokenHash: String,
         nowMillis: Long,
     ): StudentPrincipal?
+
+    suspend fun updatePassword(
+        userId: String,
+        passwordHash: String,
+    )
+
+    suspend fun deleteSession(tokenHash: String)
 }

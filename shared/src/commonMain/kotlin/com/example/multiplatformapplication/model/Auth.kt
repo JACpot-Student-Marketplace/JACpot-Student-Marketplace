@@ -27,3 +27,9 @@ data class AuthResponse(
 data class ApiError(
     val error: String,
 )
+
+@Serializable
+data class ChangePasswordRequest(
+    val currentPassword: String,
+    val newPassword: String,
+)

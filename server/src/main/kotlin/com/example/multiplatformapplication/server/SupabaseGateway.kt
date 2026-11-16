@@ -11,9 +11,11 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -138,6 +140,29 @@ class SupabaseGateway(
         return StudentPrincipal(userId = user.id, user = user)
     }
 
+    override suspend fun updatePassword(
+        userId: String,
+        passwordHash: String,
+    ) {
+        val response =
+            http.patch("$rest/users") {
+                parameter("id", "eq.$userId")
+                contentType(ContentType.Application.Json)
+                setBody(PasswordUpdate(passwordHash))
+            }
+        response.bodyAsText()
+        if (!response.status.isSuccess()) error("Could not update password (${response.status.value})")
+    }
+
+    override suspend fun deleteSession(tokenHash: String) {
+        val response =
+            http.delete("$rest/sessions") {
+                parameter("token_hash", "eq.$tokenHash")
+            }
+        response.bodyAsText()
+        if (!response.status.isSuccess()) error("Could not delete session (${response.status.value})")
+    }
+
     override suspend fun listings(): List<Listing> {
         val rows: List<ListingRow> =
             http
@@ -244,6 +269,11 @@ private data class SessionInsert(
 private data class SessionRow(
     @SerialName("user_id") val userId: String,
     @SerialName("expires_at") val expiresAt: String,
+)
+
+@Serializable
+private data class PasswordUpdate(
+    @SerialName("password_hash") val passwordHash: String,
 )
 
 @Serializable
