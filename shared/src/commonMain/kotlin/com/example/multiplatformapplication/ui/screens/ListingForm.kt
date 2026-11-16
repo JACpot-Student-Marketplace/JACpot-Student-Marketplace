@@ -20,7 +20,6 @@ internal data class ListingFormErrors(
     val any get() = listOfNotNull(title, description, price, category, condition, photos).isNotEmpty()
 }
 
-
 internal fun validateListingForm(
     title: String,
     description: String,
