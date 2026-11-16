@@ -38,7 +38,6 @@ fun ListingDetailsDialog(
     onMessageSeller: (() -> Unit)? = null,
     onEdit: (() -> Unit)? = null,
 ) {
-
     var confirmDelete by rememberSaveable(listing.id) { mutableStateOf(false) }
 
     if (confirmDelete) {
@@ -115,7 +114,6 @@ private fun ListingInformation(
     onMarkSold: () -> Unit,
     onRequestDelete: () -> Unit,
 ) {
-
     val pills =
         listOfNotNull(
             listing.condition.label,
@@ -126,7 +124,6 @@ private fun ListingInformation(
         )
 
     Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-
         ListingPhoto(
             url = listing.photoUrls.firstOrNull(),
             description = "Photo of ${listing.title}",
@@ -197,5 +194,3 @@ private fun DetailPill(text: String) {
         Text(text, Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.labelMedium)
     }
 }
-
-

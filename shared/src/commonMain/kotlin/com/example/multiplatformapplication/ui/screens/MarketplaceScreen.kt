@@ -29,8 +29,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.multiplatformapplication.model.ItemCondition
 import com.example.multiplatformapplication.model.ListingCategory
+import com.example.multiplatformapplication.model.ListingStatus
 import com.example.multiplatformapplication.model.label
 import com.example.multiplatformapplication.navigation.CreateRequestScreenKey
+import com.example.multiplatformapplication.navigation.CreateScreenKey
 import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.state.ListingSort
 import com.example.multiplatformapplication.state.LocalListings
@@ -39,10 +41,8 @@ import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.FilterMenu
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.ListingCard
-import com.example.multiplatformapplication.ui.components.SearchBar
-import com.example.multiplatformapplication.model.ListingStatus
-import com.example.multiplatformapplication.navigation.CreateScreenKey
 import com.example.multiplatformapplication.ui.components.ListingDetailsDialog
+import com.example.multiplatformapplication.ui.components.SearchBar
 
 /**
  * One student item for sale. [category] is compared to the selected chip,
