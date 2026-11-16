@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.example.multiplatformapplication.data.mockRequests
 import com.example.multiplatformapplication.model.ItemCondition
 import com.example.multiplatformapplication.model.ListingCategory
 import com.example.multiplatformapplication.model.Request
@@ -20,10 +21,12 @@ import com.example.multiplatformapplication.ui.screens.CreateSellItemForm
 import com.example.multiplatformapplication.ui.screens.LoginScreen
 import com.example.multiplatformapplication.ui.screens.MarketplaceScreen
 import com.example.multiplatformapplication.ui.screens.PlaceholderScreen
+import com.example.multiplatformapplication.ui.screens.RequestsScreen
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlin.math.roundToLong
+import kotlin.time.Clock
 
 @Serializable
 data object LoginScreenKey : NavKey
@@ -72,7 +75,8 @@ fun Router() {
     val backStack = rememberNavBackStack(backStackConfig, LoginScreenKey)
     val navigator = remember(backStack) { Navigator(backStack) }
     val listings = LocalListings.current
-    val createdRequests = remember { mutableStateListOf<Request>() } // Browse Requests will read this
+    val createdRequests = remember { mutableStateListOf<Request>() }
+    val sampleRequests = remember { mockRequests(Clock.System.now().toEpochMilliseconds()) }
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
         NavDisplay(
@@ -87,10 +91,10 @@ fun Router() {
                     }
                     entry<RequestsScreenKey> {
                         Shell(RequestsScreenKey, navigator) {
-                            PlaceholderScreen(
-                                "Requests (${createdRequests.size} posted)",
-                                "Post a request",
-                            ) { navigator.navigate(CreateRequestScreenKey) }
+                            RequestsScreen(
+                                requests = createdRequests + sampleRequests,
+                                onPostRequest = { navigator.navigate(CreateRequestScreenKey) },
+                            )
                         }
                     }
                     entry<CreateRequestScreenKey> {

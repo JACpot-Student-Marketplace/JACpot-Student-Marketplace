@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -17,7 +16,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +34,7 @@ import com.example.multiplatformapplication.state.ListingSort
 import com.example.multiplatformapplication.state.LocalListings
 import com.example.multiplatformapplication.state.queryListings
 import com.example.multiplatformapplication.ui.components.ButtonStyle
+import com.example.multiplatformapplication.ui.components.EmptyFeed
 import com.example.multiplatformapplication.ui.components.FilterMenu
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.ListingCard
@@ -201,22 +200,6 @@ private fun CategoryChips(
                 onClick = { onSelect(category) },
                 label = { Text(category.label) },
             )
-        }
-    }
-}
-
-@Composable
-private fun EmptyFeed(
-    title: String,
-    message: String,
-    actionText: String? = null,
-    onAction: () -> Unit = {},
-) {
-    Surface(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainerLow) {
-        Column(Modifier.padding(32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge)
-            Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            if (actionText != null) JACpotButton(actionText, onClick = onAction, style = ButtonStyle.Outlined)
         }
     }
 }
