@@ -33,3 +33,37 @@ so I ended up using Claude code (which I recently purchased the other week) to m
 - **AI-Generated Code:** ~45% (AI assisted with scaffolding `ListingForm.kt`, `CreateScreen.kt`, `PhotoGallery`, initial `ListingsViewModel` unit tests, and state/layout patterns; all Kamel integration, repository wiring, branch management, merge conflict resolution, manual code integration, compilation fixes, and runtime testing were performed manually to stay within the 50% AI generation limit)
 - **Impact:** Combining Gemini (for architectural planning, state hoisting patterns, unit tests, PR descriptions, and ADR formatting) with Claude Code (for read-only inspection of local models, ViewModels, and database rules) accelerated UI and validation development while preserving code consistency with existing screens like `CreateRequestScreen.kt`.
 - **Chat Transcript:** [[Gemini Chat link]]([https://share.gemini.google/na0GEaY3Qyzx]) *(Claude Desktop / Claude Code sessions were run locally)*
+
+### Luca's AI Usage for the Request Details task
+
+**Status:** Accepted
+
+**Context:**
+JACpot is a peer-to-peer student marketplace for John Abbott College, built with Kotlin Multiplatform and Compose. The task ("Request Details and AI Chat Bar Start") asked for a request detail view, then an AI chat bar for creating requests. This session covered the request details part only: showing the full information of a request from the Requests feed. The AI chat bar, draft area and listing matches are not done yet.
+
+**Decision (AI Prompts & Outputs):**
+
+- **Prompt (Claude Code, task statement):** Pasted the task description and acceptance criteria and asked to build the request detail screen.
+  - **Output:** Explored the repo, then built a full-screen detail route (`RequestDetailScreen`, a nav key, a router entry), a `formatDate` helper, `RequestStatus.label` and a date test. Tests passed. This version was later thrown away.
+- **Prompt (Claude Code, "make the pr" / "push"):** Asked for a PR, then to push.
+  - **Output:** Created a branch, committed and pushed it. The PR creation was rejected by me before it ran. I then asked whether it had been pushed, and the branch was deleted from GitHub at my request.
+- **Prompt (Claude Code, "check how my teammate did the details on normal listings, on main"):**
+  - **Output:** Read the teammate's `ListingDetailsDialog` on `main` (an `AlertDialog` opened from the screen with a `rememberSaveable` id, no nav route) and recommended matching it. A follow-up question ("whats the dif") produced a dialog-vs-screen comparison.
+- **Prompt (Claude Code, "delete the page branch, make the dif version"):**
+  - **Output:** Rebuilt the details as `RequestDetailsDialog`, styled like the listing dialog (status label, title, "Requested by X · posted Nh ago", pills, budget, description, Close). Made `RequestCard` clickable and kept the open request id in `RequestsScreen`. Tests passed.
+- **Prompt (Claude Code, "lint it"):**
+  - **Output:** Ran ktlint, which found wrapping and line-length issues in the new file, then ran `ktlintFormat`. Lint and tests passed afterwards.
+- **Prompt (Claude Code, "MERGE CONFLICTS", "just push as a new commit"):**
+  - **Output:** Found that the feed PR had been merged into `main`, rebased the two commits onto `main` without conflicts, then pushed the result as a merge commit on top of the remote branch so no force-push was needed.
+
+**Rationale [MANUAL INPUT REQUIRED]:**
+I did this with Ai for 2 reasons:
+- It was essentially a rehash of Jaden's logic for the listings tab
+- I was lazy and didn't want to do this specific part
+**Consequences / AI Generation Limits:**
+
+- **AI-Generated Code:** _[MANUAL INPUT REQUIRED]_ For this task, Claude Code wrote essentially all of the code in the PR (`RequestDetailsDialog.kt`, the `RequestCard` and `RequestsScreen` changes, `formatDate`, `RequestStatus.label`, `FormatDateTest`). The design choice to copy the teammate's dialog pattern came from reading their code on `main`. Report the share honestly against the team's 50% limit, and count your own review or edits only if you made them.
+- **Not verified by AI:** The dialog was not run or looked at in the app. Only `:shared:jvmTest` and `:shared:ktlintCheck` were run.
+- **Mistakes during the session:** The AI first claimed a branch was local only when it had already been pushed, and once ran a stray `git stash` that did nothing. Neither changed the final code.
+- **Impact:** AI sped up the exploration, the dialog and the PR text, and kept the new code consistent with the existing listing dialog. The AI chat parts of the task are still to do.
+- **Chat Transcript:** Claude Code sessions run locally, so there is no share link. The reconstructed log is in `CONVERSATION_LOG.md`.
