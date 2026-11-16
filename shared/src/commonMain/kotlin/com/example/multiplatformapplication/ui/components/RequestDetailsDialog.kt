@@ -47,7 +47,11 @@ fun RequestDetailsDialog(
         onDismissRequest = onDismiss,
         title = {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(request.status.label.uppercase(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    request.status.label.uppercase(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
                 Text(request.title)
                 Text(
                     "Requested by ${posterName(request.ownerId)} · posted ${formatTimeAgo(request.createdAt, now).lowercase()}",
@@ -87,4 +91,5 @@ fun RequestDetailsDialog(
 }
 
 @Composable
-private fun Label(text: String) = Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun Label(text: String) =
+    Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
