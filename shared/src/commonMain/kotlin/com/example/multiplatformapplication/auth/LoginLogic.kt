@@ -7,16 +7,16 @@ data class DemoAccount(
 
 val demoAccounts =
     listOf(
-        User("luca@johnabbottcollege.net", "Luca123"),
-        User("jaden@johnabbottcollege.net", "Jaden123"),
-        User("chris@johnabbottcollege.net", "Chris123"),
-        User("talib@johnabbottcollege.net", "Talib123"),
+        DemoAccount("luca@johnabbottcollege.net", "Luca123"),
+        DemoAccount("jaden@johnabbottcollege.net", "Jaden123"),
+        DemoAccount("chris@johnabbottcollege.net", "Chris123"),
+        DemoAccount("talib@johnabbottcollege.net", "Talib123"),
     )
 
 fun authenticate(
     email: String,
     password: String,
 ): Boolean {
-    val match = demoAccounts.find { it.username == username } ?: return false
+    val match = demoAccounts.find { it.email == email } ?: return false
     return match.password == password
 }

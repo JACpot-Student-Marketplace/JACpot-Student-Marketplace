@@ -15,6 +15,7 @@ import com.example.multiplatformapplication.model.ListingCategory
 import com.example.multiplatformapplication.model.Request
 import com.example.multiplatformapplication.model.label
 import com.example.multiplatformapplication.state.LocalListings
+import com.example.multiplatformapplication.ui.screens.CreateAccountScreen
 import com.example.multiplatformapplication.ui.screens.CreateRequestScreen
 import com.example.multiplatformapplication.ui.screens.CreateSellItemForm
 import com.example.multiplatformapplication.ui.screens.LoginScreen
@@ -46,6 +47,9 @@ data object CreateScreenKey : NavKey
 @Serializable
 data object CreateRequestScreenKey : NavKey
 
+@Serializable
+data object CreateAccountScreenKey : NavKey
+
 val backStackConfig =
     SavedStateConfiguration {
         serializersModule =
@@ -58,6 +62,7 @@ val backStackConfig =
                     subclass(ProfileScreenKey::class, ProfileScreenKey.serializer())
                     subclass(CreateScreenKey::class, CreateScreenKey.serializer())
                     subclass(CreateRequestScreenKey::class, CreateRequestScreenKey.serializer())
+                    subclass(CreateAccountScreenKey::class, CreateAccountScreenKey.serializer())
                 }
             }
     }
@@ -98,6 +103,9 @@ fun Router() {
                             createdRequests.add(request)
                             navigator.pop()
                         })
+                    }
+                    entry<CreateAccountScreenKey> {
+                        CreateAccountScreen()
                     }
                     entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
                     entry<CreateScreenKey> {
