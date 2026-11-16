@@ -10,16 +10,19 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.example.multiplatformapplication.data.mockRequests
 import com.example.multiplatformapplication.model.ItemCondition
 import com.example.multiplatformapplication.model.ListingCategory
 import com.example.multiplatformapplication.model.Request
 import com.example.multiplatformapplication.model.label
 import com.example.multiplatformapplication.state.LocalListings
+import com.example.multiplatformapplication.ui.screens.CreateAccountScreen
 import com.example.multiplatformapplication.ui.screens.CreateRequestScreen
 import com.example.multiplatformapplication.ui.screens.CreateSellItemForm
 import com.example.multiplatformapplication.ui.screens.LoginScreen
 import com.example.multiplatformapplication.ui.screens.MarketplaceScreen
 import com.example.multiplatformapplication.ui.screens.PlaceholderScreen
+import com.example.multiplatformapplication.ui.screens.RequestsScreen
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -27,6 +30,7 @@ import kotlin.math.roundToLong
 import com.example.multiplatformapplication.model.label
 import com.example.multiplatformapplication.state.LocalListings
 import kotlin.math.roundToLong
+import kotlin.time.Clock
 
 @Serializable
 data object LoginScreenKey : NavKey
@@ -49,6 +53,9 @@ data object CreateScreenKey : NavKey
 @Serializable
 data object CreateRequestScreenKey : NavKey
 
+@Serializable
+data object CreateAccountScreenKey : NavKey
+
 val backStackConfig =
     SavedStateConfiguration {
         serializersModule =
@@ -61,6 +68,7 @@ val backStackConfig =
                     subclass(ProfileScreenKey::class, ProfileScreenKey.serializer())
                     subclass(CreateScreenKey::class, CreateScreenKey.serializer())
                     subclass(CreateRequestScreenKey::class, CreateRequestScreenKey.serializer())
+                    subclass(CreateAccountScreenKey::class, CreateAccountScreenKey.serializer())
                 }
             }
     }
@@ -74,7 +82,9 @@ val LocalNavigator =
 fun Router() {
     val backStack = rememberNavBackStack(backStackConfig, LoginScreenKey)
     val navigator = remember(backStack) { Navigator(backStack) }
-    val createdRequests = remember { mutableStateListOf<Request>() } // Browse Requests will read this
+    val listings = LocalListings.current
+    val createdRequests = remember { mutableStateListOf<Request>() }
+    val sampleRequests = remember { mockRequests(Clock.System.now().toEpochMilliseconds()) }
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
         NavDisplay(
@@ -89,10 +99,10 @@ fun Router() {
                     }
                     entry<RequestsScreenKey> {
                         Shell(RequestsScreenKey, navigator) {
-                            PlaceholderScreen(
-                                "Requests (${createdRequests.size} posted)",
-                                "Post a request",
-                            ) { navigator.navigate(CreateRequestScreenKey) }
+                            RequestsScreen(
+                                requests = createdRequests + sampleRequests,
+                                onPostRequest = { navigator.navigate(CreateRequestScreenKey) },
+                            )
                         }
                     }
                     entry<CreateRequestScreenKey> {
@@ -100,6 +110,9 @@ fun Router() {
                             createdRequests.add(request)
                             navigator.pop()
                         })
+                    }
+                    entry<CreateAccountScreenKey> {
+                        CreateAccountScreen()
                     }
                     entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
                     entry<CreateScreenKey> {

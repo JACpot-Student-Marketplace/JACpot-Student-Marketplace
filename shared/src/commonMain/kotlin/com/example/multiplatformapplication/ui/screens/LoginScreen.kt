@@ -2,180 +2,155 @@ package com.example.multiplatformapplication.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.multiplatformapplication.auth.authenticate
-import com.example.multiplatformapplication.auth.formatAttempt
+import com.example.multiplatformapplication.navigation.CreateAccountScreenKey
 import com.example.multiplatformapplication.navigation.HomeScreenKey
 import com.example.multiplatformapplication.navigation.LocalNavigator
+import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.JACpotTextField
 
 @Composable
 fun LoginScreen() {
     val navigator = LocalNavigator.current
-    var username by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-    var isLoggedIn by rememberSaveable { mutableStateOf(false) }
-    var errorMessage by rememberSaveable { mutableStateOf("") }
+    var submitted by rememberSaveable { mutableStateOf(false) }
+    var credentialsError by rememberSaveable { mutableStateOf<String?>(null) }
 
-    val history: SnapshotStateList<String> =
-        rememberSaveable(
-            saver =
-                listSaver(
-                    save = { it.toList() },
-                    restore = { it.toMutableStateList() },
-                ),
-        ) { mutableStateListOf() }
+    fun check() = validateLogin(email, password)
+    val errors = if (submitted) check() else LoginErrors()
 
     Column(
         modifier =
             Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Card(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = Color(0xFFF5F7FA),
-                ),
-            elevation =
-                CardDefaults.cardElevation(
-                    defaultElevation = 4.dp,
-                ),
+        AuthHeader()
+        Text("Your campus.\nYour marketplace.", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "Buy used. Sell what you no longer need. Find it at John Abbott.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = MaterialTheme.shapes.medium,
         ) {
             Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(28.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(
-                    "JAC STUDENT MARKETPLACE",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                if (!isLoggedIn) {
-                    JACpotTextField(
-                        value = username,
-                        onValueChange = { username = it },
-                        label = "Please enter your username",
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    JACpotTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = "Please enter your password",
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions =
-                            KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Done,
-                            ),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    JACpotButton(
-                        text = "Log In",
-                        onClick = {
-                            if (username.isEmpty() || password.isEmpty()) {
-                                errorMessage = "Enter a username and password."
-                            } else {
-                                val success = authenticate(username, password)
-                                history.add(0, formatAttempt(username, success))
-
-                                if (success) {
-                                    isLoggedIn = true
-                                    navigator.replace(HomeScreenKey)
-                                    errorMessage = ""
-                                } else {
-                                    errorMessage = "Wrong username or password."
-                                }
-
-                                password = ""
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-
-                    if (errorMessage.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(errorMessage)
-                    }
-                } else {
-                    Text("Welcome $username!")
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    JACpotButton(
-                        text = "Log Out",
-                        onClick = {
-                            isLoggedIn = false
-                            username = ""
-                            password = ""
-                            errorMessage = ""
-                        },
-                        modifier = Modifier.fillMaxWidth(),
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                    shape = MaterialTheme.shapes.small,
+                ) {
+                    Text(
+                        "JOHN ABBOTT",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelMedium,
                     )
                 }
-
-                Spacer(modifier = Modifier.height(20.dp))
+                Text("Made for student-to-student exchanges.", style = MaterialTheme.typography.bodyMedium)
             }
         }
-        Text(
-            "History:",
-            fontWeight = FontWeight.Bold,
+        Text("Welcome back", style = MaterialTheme.typography.titleLarge)
+        JACpotTextField(
+            value = email,
+            onValueChange = {
+                email = it
+                credentialsError = null
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Student email",
+            placeholder = "you@johnabbottcollege.net",
+            errorText = errors.email,
+            singleLine = true,
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next,
+                ),
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        for (entry in history) {
-            Text(entry)
+        JACpotTextField(
+            value = password,
+            onValueChange = {
+                password = it
+                credentialsError = null
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Password",
+            errorText = errors.password,
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done,
+                ),
+        )
+        credentialsError?.let {
+            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
         }
+        Text(
+            "Forgot password?",
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.End,
+        )
+        JACpotButton(
+            text = "Log in",
+            onClick = {
+                submitted = true
+                credentialsError = null
+                if (!check().any) {
+                    if (authenticate(email.trim(), password)) {
+                        navigator.replace(HomeScreenKey)
+                    } else {
+                        credentialsError = "Wrong email or password."
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        JACpotButton(
+            text = "Create an account",
+            onClick = { navigator.navigate(CreateAccountScreenKey) },
+            modifier = Modifier.fillMaxWidth(),
+            style = ButtonStyle.Outlined,
+        )
+        Text(
+            "By continuing, you agree to the Terms and Privacy Policy.",
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
