@@ -12,11 +12,12 @@ import kotlin.test.assertTrue
 class AuthFormTest {
     @Test
     fun validAccountCreationHasNoErrors() {
-        val errors = validateCreateAccount(
-            name = "Luca",
-            email = "luca@johnabbottcollege.net",
-            password = "Luca123",
-        )
+        val errors =
+            validateCreateAccount(
+                name = "Luca",
+                email = "luca@johnabbottcollege.net",
+                password = "Luca123",
+            )
 
         assertFalse(errors.any)
         assertNull(errors.name)
@@ -26,11 +27,12 @@ class AuthFormTest {
 
     @Test
     fun trimmedAbbottEmailIsAccepted() {
-        val errors = validateCreateAccount(
-            name = "Luca",
-            email = "  luca@johnabbottcollege.net  ",
-            password = "Luca123",
-        )
+        val errors =
+            validateCreateAccount(
+                name = "Luca",
+                email = "  luca@johnabbottcollege.net  ",
+                password = "Luca123",
+            )
 
         assertFalse(errors.any)
     }
@@ -64,13 +66,14 @@ class AuthFormTest {
     @Test
     fun nonAbbottEmailIsRejected() {
         val message = "Use a lowercase @johnabbottcollege.net email."
-        val rejected = listOf(
-            "luca@gmail.com",
-            "luca@johnabbott.ca",
-            "Luca@johnabbottcollege.net",
-            "luca@JohnAbbottCollege.net",
-            "@johnabbottcollege.net",
-        )
+        val rejected =
+            listOf(
+                "luca@gmail.com",
+                "luca@johnabbott.ca",
+                "Luca@johnabbottcollege.net",
+                "luca@JohnAbbottCollege.net",
+                "@johnabbottcollege.net",
+            )
 
         rejected.forEach { email ->
             val errors = validateCreateAccount("Luca", email, "Luca123")
