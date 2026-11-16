@@ -27,9 +27,11 @@ import com.example.multiplatformapplication.model.formatTimeAgo
 fun RequestCard(
     request: Request,
     now: Long,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
+        onClick = onClick,
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
