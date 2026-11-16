@@ -3,11 +3,12 @@ package com.example.multiplatformapplication.ui.screens
 import com.example.multiplatformapplication.model.validateEmail
 
 internal data class CreateAccountErrors(
-    val name: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
     val email: String? = null,
     val password: String? = null,
 ) {
-    val any get() = listOfNotNull(name, email, password).isNotEmpty()
+    val any get() = listOfNotNull(firstName, lastName, email, password).isNotEmpty()
 }
 
 internal data class LoginErrors(
@@ -24,12 +25,14 @@ private fun emailFieldError(email: String): String? {
 }
 
 internal fun validateCreateAccount(
-    name: String,
+    firstName: String,
+    lastName: String,
     email: String,
     password: String,
 ): CreateAccountErrors =
     CreateAccountErrors(
-        name = "Name is required.".takeIf { name.isBlank() },
+        firstName = "First name is required.".takeIf { firstName.isBlank() },
+        lastName = "Last name is required.".takeIf { lastName.isBlank() },
         email = emailFieldError(email),
         password = "Password is required.".takeIf { password.isBlank() },
     )

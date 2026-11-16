@@ -2,6 +2,7 @@ package com.example.multiplatformapplication.server
 
 import com.example.multiplatformapplication.model.AuthResponse
 import com.example.multiplatformapplication.model.User
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -127,6 +128,8 @@ class AuthRouteTest {
                 assertEquals(HttpStatusCode.Unauthorized, client.get(path).status, path)
             }
             assertEquals(HttpStatusCode.Unauthorized, client.post("/listings").status)
+            assertEquals(HttpStatusCode.Unauthorized, client.post("/password").status)
+            assertEquals(HttpStatusCode.Unauthorized, client.delete("/session").status)
         }
 
     @Test
@@ -143,6 +146,80 @@ class AuthRouteTest {
             val auth = Json.decodeFromString<AuthResponse>(login().bodyAsText())
             clock.now += SESSION_TTL_MILLIS + 1
             assertEquals(HttpStatusCode.Unauthorized, getAuth("/listings", auth.token).status)
+            assertEquals(HttpStatusCode.Unauthorized, getAuth("/me", auth.token).status)
+        }
+
+    @Test
+    fun changePasswordReplacesTheHash() =
+        authTest { store, _ ->
+            register()
+            val auth = Json.decodeFromString<AuthResponse>(login().bodyAsText())
+            val response =
+                postAuth(
+                    "/password",
+                    auth.token,
+                    """{"currentPassword":"$PASSWORD","newPassword":"new-secret"}""",
+                )
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(HttpStatusCode.Unauthorized, login().status)
+            assertEquals(HttpStatusCode.OK, login(password = "new-secret").status)
+            assertEquals(HttpStatusCode.OK, getAuth("/me", auth.token).status)
+            assertTrue(PasswordHasher(cost = 4).verify("new-secret", store.students.single().passwordHash!!))
+        }
+
+    @Test
+    fun changePasswordRejectsTheWrongCurrentPassword() =
+        authTest { store, _ ->
+            register()
+            val auth = Json.decodeFromString<AuthResponse>(login().bodyAsText())
+            val before = store.students.single().passwordHash
+            val response =
+                postAuth(
+                    "/password",
+                    auth.token,
+                    """{"currentPassword":"wrong-password","newPassword":"new-secret"}""",
+                )
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(before, store.students.single().passwordHash)
+            assertEquals(HttpStatusCode.OK, login().status)
+            assertEquals(HttpStatusCode.Unauthorized, login(password = "new-secret").status)
+        }
+
+    @Test
+    fun changePasswordOnlyAffectsTheSignedInStudent() =
+        authTest { store, _ ->
+            register()
+            register(email = "bea@johnabbottcollege.net", firstName = "Bea")
+            val ada = Json.decodeFromString<AuthResponse>(login().bodyAsText())
+            val bea =
+                Json.decodeFromString<AuthResponse>(
+                    login(email = "bea@johnabbottcollege.net").bodyAsText(),
+                )
+            val response =
+                postAuth(
+                    "/password",
+                    bea.token,
+                    """{"currentPassword":"$PASSWORD","newPassword":"bea-new-pass"}""",
+                )
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(HttpStatusCode.OK, login().status)
+            assertEquals(HttpStatusCode.Unauthorized, login(email = "bea@johnabbottcollege.net").status)
+            val beaLogin = login(email = "bea@johnabbottcollege.net", password = "bea-new-pass")
+            assertEquals(HttpStatusCode.OK, beaLogin.status)
+            val adaHash = store.students.first { it.user.id == ada.user.id }.passwordHash!!
+            assertTrue(PasswordHasher(cost = 4).verify(PASSWORD, adaHash))
+        }
+
+    @Test
+    fun logoutRejectsTheOldToken() =
+        authTest { _, _ ->
+            register()
+            val auth = Json.decodeFromString<AuthResponse>(login().bodyAsText())
+            val response =
+                client.delete("/session") {
+                    header(HttpHeaders.Authorization, "Bearer ${auth.token}")
+                }
+            assertEquals(HttpStatusCode.NoContent, response.status)
             assertEquals(HttpStatusCode.Unauthorized, getAuth("/me", auth.token).status)
         }
 }
@@ -177,6 +254,17 @@ private suspend fun ApplicationTestBuilder.login(
     email: String = EMAIL,
     password: String = PASSWORD,
 ): HttpResponse = postJson("/login", """{"email":"$email","password":"$password"}""")
+
+private suspend fun ApplicationTestBuilder.postAuth(
+    path: String,
+    token: String,
+    json: String,
+): HttpResponse =
+    client.post(path) {
+        header(HttpHeaders.Authorization, "Bearer $token")
+        contentType(ContentType.Application.Json)
+        setBody(json)
+    }
 
 private suspend fun ApplicationTestBuilder.postJson(
     path: String,

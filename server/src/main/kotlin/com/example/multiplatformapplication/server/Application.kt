@@ -60,6 +60,8 @@ fun Application.module(
         registerRoute(store, hasher)
         loginRoute(store, hasher, clock)
         authenticate("student") {
+            passwordRoute(store, hasher)
+            logoutRoute(store)
             get("/me") {
                 val student = call.principal<StudentPrincipal>()
                 if (student == null) {

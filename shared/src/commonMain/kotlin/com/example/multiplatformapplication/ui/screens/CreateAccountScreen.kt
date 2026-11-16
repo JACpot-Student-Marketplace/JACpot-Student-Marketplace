@@ -13,6 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -20,20 +22,29 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.multiplatformapplication.api.ApiException
+import com.example.multiplatformapplication.model.RegisterRequest
+import com.example.multiplatformapplication.navigation.LocalAuth
 import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.JACpotTextField
+import kotlinx.coroutines.launch
 
 @Composable
 fun CreateAccountScreen() {
     val navigator = LocalNavigator.current
-    var name by rememberSaveable { mutableStateOf("") }
+    val auth = LocalAuth.current
+    val scope = rememberCoroutineScope()
+    var firstName by rememberSaveable { mutableStateOf("") }
+    var lastName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var submitted by rememberSaveable { mutableStateOf(false) }
+    var serverError by rememberSaveable { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
 
-    fun check() = validateCreateAccount(name, email, password)
+    fun check() = validateCreateAccount(firstName, lastName, email, password)
     val errors = if (submitted) check() else CreateAccountErrors()
 
     Column(
@@ -52,11 +63,20 @@ fun CreateAccountScreen() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         JACpotTextField(
-            value = name,
-            onValueChange = { name = it },
+            value = firstName,
+            onValueChange = { firstName = it },
             modifier = Modifier.fillMaxWidth(),
-            label = "Name",
-            errorText = errors.name,
+            label = "First name",
+            errorText = errors.firstName,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        )
+        JACpotTextField(
+            value = lastName,
+            onValueChange = { lastName = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Last name",
+            errorText = errors.lastName,
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         )
@@ -88,13 +108,39 @@ fun CreateAccountScreen() {
                     imeAction = ImeAction.Done,
                 ),
         )
+        serverError?.let {
+            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+        }
         JACpotButton(
             text = "Create account",
             onClick = {
                 submitted = true
-                if (!check().any) navigator.pop()
+                serverError = null
+                if (!check().any && !busy) {
+                    busy = true
+                    scope.launch {
+                        try {
+                            auth.api.register(
+                                RegisterRequest(
+                                    firstName = firstName.trim(),
+                                    lastName = lastName.trim(),
+                                    email = email.trim(),
+                                    password = password,
+                                ),
+                            )
+                            navigator.pop()
+                        } catch (error: ApiException) {
+                            serverError = error.message
+                        } catch (_: Exception) {
+                            serverError = "Could not reach JACpot. Try again."
+                        } finally {
+                            busy = false
+                        }
+                    }
+                }
             },
             modifier = Modifier.fillMaxWidth(),
+            enabled = !busy,
         )
         JACpotButton(
             text = "Log in",

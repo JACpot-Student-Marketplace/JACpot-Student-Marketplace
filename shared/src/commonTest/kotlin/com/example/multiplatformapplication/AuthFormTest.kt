@@ -1,6 +1,5 @@
 package com.example.multiplatformapplication
 
-import com.example.multiplatformapplication.auth.authenticate
 import com.example.multiplatformapplication.ui.screens.validateCreateAccount
 import com.example.multiplatformapplication.ui.screens.validateLogin
 import kotlin.test.Test
@@ -14,13 +13,15 @@ class AuthFormTest {
     fun validAccountCreationHasNoErrors() {
         val errors =
             validateCreateAccount(
-                name = "Luca",
+                firstName = "Luca",
+                lastName = "Maiolo",
                 email = "luca@johnabbottcollege.net",
                 password = "Luca123",
             )
 
         assertFalse(errors.any)
-        assertNull(errors.name)
+        assertNull(errors.firstName)
+        assertNull(errors.lastName)
         assertNull(errors.email)
         assertNull(errors.password)
     }
@@ -29,7 +30,8 @@ class AuthFormTest {
     fun trimmedAbbottEmailIsAccepted() {
         val errors =
             validateCreateAccount(
-                name = "Luca",
+                firstName = "Luca",
+                lastName = "Maiolo",
                 email = "  luca@johnabbottcollege.net  ",
                 password = "Luca123",
             )
@@ -39,10 +41,11 @@ class AuthFormTest {
 
     @Test
     fun createAccountRequiresNameEmailAndPassword() {
-        val errors = validateCreateAccount(name = " ", email = " ", password = " ")
+        val errors = validateCreateAccount(firstName = " ", lastName = " ", email = " ", password = " ")
 
         assertTrue(errors.any)
-        assertEquals("Name is required.", errors.name)
+        assertEquals("First name is required.", errors.firstName)
+        assertEquals("Last name is required.", errors.lastName)
         assertEquals("Email is required.", errors.email)
         assertEquals("Password is required.", errors.password)
     }
@@ -50,16 +53,20 @@ class AuthFormTest {
     @Test
     fun eachCreateAccountFieldIsRequiredOnItsOwn() {
         assertEquals(
-            "Name is required.",
-            validateCreateAccount("", "luca@johnabbottcollege.net", "Luca123").name,
+            "First name is required.",
+            validateCreateAccount("", "Maiolo", "luca@johnabbottcollege.net", "Luca123").firstName,
+        )
+        assertEquals(
+            "Last name is required.",
+            validateCreateAccount("Luca", "", "luca@johnabbottcollege.net", "Luca123").lastName,
         )
         assertEquals(
             "Email is required.",
-            validateCreateAccount("Luca", "", "Luca123").email,
+            validateCreateAccount("Luca", "Maiolo", "", "Luca123").email,
         )
         assertEquals(
             "Password is required.",
-            validateCreateAccount("Luca", "luca@johnabbottcollege.net", "").password,
+            validateCreateAccount("Luca", "Maiolo", "luca@johnabbottcollege.net", "").password,
         )
     }
 
@@ -76,7 +83,7 @@ class AuthFormTest {
             )
 
         rejected.forEach { email ->
-            val errors = validateCreateAccount("Luca", email, "Luca123")
+            val errors = validateCreateAccount("Luca", "Maiolo", email, "Luca123")
             assertEquals(message, errors.email, email)
             assertTrue(errors.any)
         }
@@ -106,13 +113,5 @@ class AuthFormTest {
         assertEquals("Use a lowercase @johnabbottcollege.net email.", outsideEmail.email)
         assertNull(outsideEmail.password)
         assertTrue(outsideEmail.any)
-    }
-
-    @Test
-    fun loginAcceptsOnlyMatchingDemoCredentials() {
-        assertTrue(authenticate("luca@johnabbottcollege.net", "Luca123"))
-        assertFalse(authenticate("luca@johnabbottcollege.net", "wrong"))
-        assertFalse(authenticate("nobody@johnabbottcollege.net", "Luca123"))
-        assertFalse(authenticate("luca@gmail.com", "Luca123"))
     }
 }

@@ -87,6 +87,7 @@ kotlin {
             implementation(libs.ktor.client.cio)
         }
         wasmJsMain.dependencies {
+            implementation(libs.wrappers.browser)
             implementation(libs.ktor.client.js)
         }
     }

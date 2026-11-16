@@ -2,13 +2,17 @@ package com.example.multiplatformapplication.server
 
 import com.example.multiplatformapplication.model.ApiError
 import com.example.multiplatformapplication.model.AuthResponse
+import com.example.multiplatformapplication.model.ChangePasswordRequest
 import com.example.multiplatformapplication.model.LoginRequest
 import com.example.multiplatformapplication.model.RegisterRequest
 import com.example.multiplatformapplication.model.validateEmail
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.post
 
 fun Route.registerRoute(
@@ -66,6 +70,44 @@ fun Route.loginRoute(
             expiresAt = expiresAt,
         )
         call.respond(AuthResponse(token = token, expiresAt = expiresAt, user = stored.user))
+    }
+}
+
+fun Route.passwordRoute(
+    store: StudentStore,
+    hasher: PasswordHasher,
+) {
+    post("/password") {
+        val student = call.principal<StudentPrincipal>()
+        if (student == null) {
+            call.respond(HttpStatusCode.Unauthorized)
+            return@post
+        }
+        val body = call.receive<ChangePasswordRequest>()
+        if (body.newPassword.isBlank()) {
+            call.respond(HttpStatusCode.BadRequest, ApiError("Password is required."))
+            return@post
+        }
+        val stored = store.findByEmail(student.user.email)
+        val currentOk =
+            stored != null &&
+                stored.user.id == student.userId &&
+                hasher.matches(body.currentPassword, stored.passwordHash)
+        if (!currentOk) {
+            call.respond(HttpStatusCode.Unauthorized, ApiError("Current password is incorrect."))
+            return@post
+        }
+        store.updatePassword(student.userId, hasher.hash(body.newPassword))
+        call.respond(HttpStatusCode.OK)
+    }
+}
+
+fun Route.logoutRoute(store: StudentStore) {
+    delete("/session") {
+        val header = call.request.headers[HttpHeaders.Authorization]
+        val token = header?.removePrefix("Bearer ")?.trim().orEmpty()
+        if (token.isNotEmpty()) store.deleteSession(hashSessionToken(token))
+        call.respond(HttpStatusCode.NoContent)
     }
 }
 

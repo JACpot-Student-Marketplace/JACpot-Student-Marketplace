@@ -14,6 +14,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -22,21 +24,27 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.multiplatformapplication.auth.authenticate
+import com.example.multiplatformapplication.api.ApiException
+import com.example.multiplatformapplication.model.LoginRequest
 import com.example.multiplatformapplication.navigation.CreateAccountScreenKey
 import com.example.multiplatformapplication.navigation.HomeScreenKey
+import com.example.multiplatformapplication.navigation.LocalAuth
 import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.JACpotTextField
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen() {
     val navigator = LocalNavigator.current
+    val auth = LocalAuth.current
+    val scope = rememberCoroutineScope()
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var submitted by rememberSaveable { mutableStateOf(false) }
     var credentialsError by rememberSaveable { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
 
     fun check() = validateLogin(email, password)
     val errors = if (submitted) check() else LoginErrors()
@@ -129,15 +137,25 @@ fun LoginScreen() {
             onClick = {
                 submitted = true
                 credentialsError = null
-                if (!check().any) {
-                    if (authenticate(email.trim(), password)) {
-                        navigator.replace(HomeScreenKey)
-                    } else {
-                        credentialsError = "Wrong email or password."
+                if (!check().any && !busy) {
+                    busy = true
+                    scope.launch {
+                        try {
+                            val response = auth.api.login(LoginRequest(email.trim(), password))
+                            auth.save(response)
+                            navigator.replace(HomeScreenKey)
+                        } catch (error: ApiException) {
+                            credentialsError = error.message
+                        } catch (_: Exception) {
+                            credentialsError = "Could not reach JACpot. Try again."
+                        } finally {
+                            busy = false
+                        }
                     }
                 }
             },
             modifier = Modifier.fillMaxWidth(),
+            enabled = !busy,
         )
         JACpotButton(
             text = "Create an account",

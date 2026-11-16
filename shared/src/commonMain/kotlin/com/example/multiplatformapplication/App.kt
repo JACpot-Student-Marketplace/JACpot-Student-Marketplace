@@ -5,9 +5,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.multiplatformapplication.auth.AuthController
+import com.example.multiplatformapplication.auth.createSessionStore
+import com.example.multiplatformapplication.navigation.LocalAuth
 import com.example.multiplatformapplication.navigation.Router
 import com.example.multiplatformapplication.state.ListingsViewModel
 import com.example.multiplatformapplication.state.LocalListings
@@ -17,8 +21,12 @@ import com.example.multiplatformapplication.ui.theme.JACpotTheme
 @Preview
 fun App() {
     val listings = viewModel { ListingsViewModel() }
+    val auth = remember { AuthController(createSessionStore()) }
     JACpotTheme {
-        CompositionLocalProvider(LocalListings provides listings) {
+        CompositionLocalProvider(
+            LocalListings provides listings,
+            LocalAuth provides auth,
+        ) {
             // Nothing else paints the theme background.
             Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                 Router()

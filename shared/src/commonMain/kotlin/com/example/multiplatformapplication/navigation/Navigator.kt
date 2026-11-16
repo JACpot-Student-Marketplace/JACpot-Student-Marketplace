@@ -29,4 +29,9 @@ class Navigator(
         if (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
         backStack += key
     }
+
+    fun reset(key: NavKey) {
+        while (backStack.isNotEmpty()) backStack.removeAt(backStack.lastIndex)
+        backStack += key
+    }
 }

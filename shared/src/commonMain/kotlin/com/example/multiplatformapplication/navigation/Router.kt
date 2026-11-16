@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.example.multiplatformapplication.auth.AuthController
 import com.example.multiplatformapplication.data.mockRequests
 import com.example.multiplatformapplication.model.ItemCondition
 import com.example.multiplatformapplication.model.ListingCategory
@@ -75,9 +76,15 @@ val LocalNavigator =
         error("No Navigator found! Wrap your UI with CompositionLocalProvider.")
     }
 
+val LocalAuth =
+    compositionLocalOf<AuthController> {
+        error("No AuthController found! Wrap your UI with CompositionLocalProvider.")
+    }
+
 @Composable
 fun Router() {
-    val backStack = rememberNavBackStack(backStackConfig, LoginScreenKey)
+    val start = if (LocalAuth.current.session == null) LoginScreenKey else HomeScreenKey
+    val backStack = rememberNavBackStack(backStackConfig, start)
     val navigator = remember(backStack) { Navigator(backStack) }
     val listings = LocalListings.current
     val createdRequests = remember { mutableStateListOf<Request>() }
