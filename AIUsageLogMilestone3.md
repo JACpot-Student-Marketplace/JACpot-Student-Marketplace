@@ -67,3 +67,55 @@ I did this with Ai for 2 reasons:
 - **Mistakes during the session:** The AI first claimed a branch was local only when it had already been pushed, and once ran a stray `git stash` that did nothing. Neither changed the final code.
 - **Impact:** AI sped up the exploration, the dialog and the PR text, and kept the new code consistent with the existing listing dialog. The AI chat parts of the task are still to do.
 - **Chat Transcript:** Claude Code sessions run locally, so there is no share link. The reconstructed log is in `CONVERSATION_LOG.md`.
+
+### Chris' AI Usage for milestone 3
+
+**Title:** AI Assistance for Shared Models, the Ktor/Supabase Server, and Auth Tests
+
+**Status:** Accepted
+
+**Context:**
+For JACPot, the client and server needed the same records for users, listings, requests, conversations, messages, and buy requests, and the Ktor server had to read and write the Supabase tables that were already created. The login screen, create-account screen, and their validation were already written. This session was used to shape those shared models, stand up the server and shared Ktor client, and add tests around the auth validation that was already in place.
+
+**Decision (AI Prompts & Outputs):**
+I used Cursor as an architectural advisor and to generate the shared models, the server module, and the auth tests.
+
+- **Prompt 1:** Pasted the JACPot proposal and asked the assistant to stand by.
+  - *Output:* Restated the three pillars, the shared-model plan, and the Ktor, Compose, and database split.
+- **Prompt 2:** Asked how to start the database work for task F5, including the data classes needed to store the Part A records.
+  - *Output:* Proposed shared `@Serializable` models with `String` ids and prices in cents, plus server-only document types, indexes, and the Part A validation rules.
+- **Prompt 3:** Asked whether that design matched task F3 (shared classes and validation for User, Listing, Request, Conversation, Message, and BuyRequest).
+  - *Output:* Confirmed that it did, and listed what was still missing: the files were not in `shared` yet, `ObjectId` had to stay out of `commonMain`, and the validation functions were not written yet.
+- **Prompt 4:** Asked whether switching from MongoDB to Supabase would change those models.
+  - *Output:* The shared classes and validation stayed the same. Supabase changed the storage to UUID tables, and the Ktor server remained the only component allowed to hold the Supabase secret.
+- **Prompt 5:** Asked for the Supabase tables.
+  - *Output:* Provided the SQL for `users`, `listings`, `listing_photos`, `requests`, `conversations`, `messages`, and `buy_requests`, including the email, price, photo, expiry, and one-conversation-per-pair constraints.
+- **Prompt 6:** Asked how to run `select *` in the Supabase SQL editor, then reported that the query succeeded with no rows.
+  - *Output:* Showed `select * from users` and a sample insert for one `@johnabbottcollege.net` account.
+- **Prompt 7:** Asked what to add for the shared models, and where.
+  - *Output:* Specified `shared/src/commonMain/kotlin/com/example/multiplatformapplication/model/` and supplied `Enums.kt`, `User.kt`, `Listing.kt`, `Request.kt`, `Conversation.kt`, `Message.kt`, `BuyRequest.kt`, and `Validation.kt`.
+- **Prompt 8:** Asked what `THIRTY_DAYS_MS` is, and whether the proposal states the 30-day rule.
+  - *Output:* Explained it as 30 days in milliseconds for `requestExpiresAt`, and pointed to the proposal’s 30-day request lifetime. The constant name itself is not in the proposal.
+- **Prompt 9:** Asked how to set up the Ktor server, keep the Supabase URL and secret on the server only, and add one shared Ktor client for every platform.
+  - *Output:* Laid out the `:server` module, `server/.env`, `SupabaseGateway`, `Application.kt` on port 8080, and `JacpotApi` with a base URL and no Supabase credentials.
+- **Prompt 10:** Asked where the `server` folder goes, what to add to `gradle/libs.versions.toml`, and for the code with full paths. Also asked whether Android Studio could generate the module.
+  - *Output:* Put `:server` next to `shared`, listed the Ktor 3.6.1 catalog entries, and gave the file contents. A separate Ktor project template was the wrong starting point.
+- **Prompt 11:** Asked the assistant to add `DotEnv.kt`, `SupabaseGateway.kt`, `Application.kt`, and the platform API clients.
+  - *Output:* Wrote those server files, added `NewListing` to the shared listing model, and added `ApiPlatform` implementations for desktop, Android (`10.0.2.2`), JavaScript, and Wasm. User reads omit `password_hash`.
+- **Prompt 12:** Asked how to run ktlint, whether `96% EXECUTING` on `:server:run` was normal, and why `ktlintCheck` still failed after `ktlintFormat`.
+  - *Output:* Gave `ktlintFormat` and `ktlintCheck`. The server staying at 96% means it is running. The remaining failure was the filename rule, so `DotEnv.kt` had to be renamed to `ServerEnv.kt`.
+- **Prompt 13:** Asked for tests for a valid account, required fields, a non-Abbott email, and a login that requires a valid email and password.
+  - *Output:* Supplied `AuthFormTest.kt`, which calls `validateCreateAccount`, `validateLogin`, and `authenticate`. The login screen, create-account screen, and that validation were already written and were not generated here.
+- **Prompt 14:** Pasted the `:shared:allTests` failure.
+  - *Output:* The failure was a missing Android SDK on `:shared:testAndroidHostTest`. The auth tests themselves run with `:shared:jvmTest`.
+
+**Rationale:**
+
+Ai was super crucial to my part of this milestone as it was unknown territory doing all the supabase integration with the Ktor server module. All my ai usage except for tests for my login and create screens revolved around the backend and the communication with supabase, I wouldn't have been able to complete all of that for this milestone had I not worked with ai and understand from what it gave me. As per what was said in class, it was heavily incentivised for this use and I feel that I truly worked well with it.
+
+**Consequences / AI Generation Limits:**
+
+- **Total AI generation counted toward the limit:** ~45%.
+- I stayed under the 50% limit. The login screen, create-account screen, and their validation were written by me (`LoginScreen.kt`, `CreateAccountScreen.kt`, `AuthForm.kt`, and the demo login check). In this session the AI generated the shared models (`User`, `Listing`, `Request`, `Conversation`, `Message`, `BuyRequest`, the enums, and `Validation.kt`) and `AuthFormTest.kt`. That is about 310 AI-generated lines against about 370 lines I wrote for those screens and their validation.
+- **The AI-generation limit does not apply to the backend Ktor and Supabase integration.** The server module, the Supabase SQL, the gateway, and the shared Ktor client that calls the server are excluded from the percentage above. That backend work in this session was AI-generated, and it is reported separately because the limit does not cover it.
+- The AI work gave the app one set of shared records, a server that can read and write Supabase without putting the secret in the client, and tests that check the account and login rules I had already implemented.
