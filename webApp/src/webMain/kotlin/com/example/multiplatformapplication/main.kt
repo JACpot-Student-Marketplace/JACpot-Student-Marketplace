@@ -2,9 +2,20 @@ package com.example.multiplatformapplication
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
+import com.example.multiplatformapplication.navigation.ExternalUriHandler
+import kotlinx.browser.window
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
+    ExternalUriHandler.onNewUri(window.location.href)
+
+    window.addEventListener(("hashchange")) {
+        ExternalUriHandler.onNewUri(window.location.href)
+    }
+    window.addEventListener(("popstate")) {
+        ExternalUriHandler.onNewUri(window.location.href)
+    }
+
     ComposeViewport {
         App()
     }

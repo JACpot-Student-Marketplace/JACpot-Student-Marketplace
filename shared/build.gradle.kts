@@ -56,6 +56,7 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -88,6 +89,7 @@ kotlin {
             implementation(libs.ktor.client.cio)
         }
         wasmJsMain.dependencies {
+            implementation(libs.wrappers.browser)
             implementation(libs.ktor.client.js)
         }
     }

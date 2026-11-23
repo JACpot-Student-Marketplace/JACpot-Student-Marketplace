@@ -24,6 +24,22 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlin.time.Clock
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
 @Serializable
 data object LoginScreenKey : NavKey
@@ -79,6 +95,22 @@ fun Router() {
     val createdRequests = remember { mutableStateListOf<Request>() }
     val sampleRequests = remember { mockRequests(Clock.System.now().toEpochMilliseconds()) }
 
+    val deepLinkResolver = remember { RouterDeepLinkResolver() }
+    var sendResultToLauncher by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        ExternalUriHandler.listener = { uri ->
+            deepLinkResolver.resolve(uri)?.let { match ->
+                sendResultToLauncher = match.sendResult
+                backStack.clear()
+                backStack.addAll(match.backStack)
+            }
+        }
+        onDispose {
+            ExternalUriHandler.listener = null
+        }
+    }
+
     CompositionLocalProvider(LocalNavigator provides navigator) {
         NavDisplay(
             backStack = backStack,
@@ -86,12 +118,18 @@ fun Router() {
             entryProvider =
                 entryProvider {
                     entry<LoginScreenKey> { LoginScreen() }
-                    entry<HomeScreenKey> { Shell(HomeScreenKey, navigator) { PlaceholderScreen("Home") } }
+                    entry<HomeScreenKey> {
+                        Shell(HomeScreenKey, navigator, sendResultToLauncher) {
+                            PlaceholderScreen("Home")
+                        }
+                    }
                     entry<MarketplaceScreenKey> {
-                        Shell(MarketplaceScreenKey, navigator) { MarketplaceScreen() }
+                        Shell(MarketplaceScreenKey, navigator, sendResultToLauncher) {
+                            MarketplaceScreen()
+                        }
                     }
                     entry<RequestsScreenKey> {
-                        Shell(RequestsScreenKey, navigator) {
+                        Shell(RequestsScreenKey, navigator, sendResultToLauncher) {
                             RequestsScreen(
                                 requests = createdRequests + sampleRequests,
                                 onPostRequest = { navigator.navigate(CreateRequestScreenKey) },
@@ -107,7 +145,11 @@ fun Router() {
                     entry<CreateAccountScreenKey> {
                         CreateAccountScreen()
                     }
-                    entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
+                    entry<ProfileScreenKey> {
+                        Shell(ProfileScreenKey, navigator, sendResultToLauncher) {
+                            PlaceholderScreen("Profile")
+                        }
+                    }
                     entry<CreateScreenKey> {
                         CreateSellItemForm(onCreated = {
                             navigator.popUntil(HomeScreenKey)
@@ -124,14 +166,46 @@ fun Router() {
 private fun Shell(
     current: NavKey,
     navigator: Navigator,
+    sendResult: Boolean = false,
     content: @Composable () -> Unit,
-) = AdaptiveNavigation(
-    selected = current,
-    onSelect = { key ->
-        if (key != current) {
-            navigator.popUntil(HomeScreenKey)
-            if (key != HomeScreenKey) navigator.navigate(key)
+) {
+    val sendResultAndClose = rememberResultResponder()
+
+    Column {
+        if (sendResult) {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Opened from JAC Planner",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Button(onClick = {
+                        sendResultAndClose("JACpot Verified: User logged in (${current::class.simpleName})")
+                    }) {
+                        Text("Return Result")
+                    }
+                }
+            }
         }
-    },
-    content = content,
-)
+
+        AdaptiveNavigation(
+            selected = current,
+            onSelect = { key ->
+                if (key != current) {
+                    navigator.popUntil(HomeScreenKey)
+                    if (key != HomeScreenKey) navigator.navigate(key)
+                }
+            },
+            content = content,
+        )
+    }
+}
