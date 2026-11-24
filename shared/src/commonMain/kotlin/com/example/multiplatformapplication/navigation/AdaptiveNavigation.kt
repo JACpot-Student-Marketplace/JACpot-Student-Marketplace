@@ -39,7 +39,7 @@ private class Tab(
 private val tabs =
     listOf(
         Tab(HomeScreenKey, "Home", Icons.Default.Home),
-        Tab(MarketplaceScreenKey, "Listings", Icons.AutoMirrored.Filled.List),
+        Tab(MarketplaceScreenKey(), "Listings", Icons.AutoMirrored.Filled.List),
         Tab(RequestsScreenKey, "Requests", Icons.Default.Search),
         Tab(ProfileScreenKey, "Profile", Icons.Default.Person),
     )
@@ -74,7 +74,7 @@ fun AdaptiveNavigation(
                     tabs.forEach { tab ->
                         if (tab.key == ProfileScreenKey) Spacer(Modifier.weight(1f))
                         NavigationRailItem(
-                            selected = tab.key == selected,
+                            selected = tab.key::class == selected::class,
                             onClick = { onSelect(tab.key) },
                             icon = { Icon(tab.icon, contentDescription = null) },
                             label = { Text(tab.label) },
@@ -95,7 +95,7 @@ fun AdaptiveNavigation(
                     NavigationBar {
                         tabs.forEach { tab ->
                             NavigationBarItem(
-                                selected = tab.key == selected,
+                                selected = tab.key::class == selected::class,
                                 onClick = { onSelect(tab.key) },
                                 icon = { Icon(tab.icon, contentDescription = null) },
                                 label = { Text(tab.label) },

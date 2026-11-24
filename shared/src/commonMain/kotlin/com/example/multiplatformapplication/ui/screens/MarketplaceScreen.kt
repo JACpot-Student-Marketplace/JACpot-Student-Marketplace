@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.multiplatformapplication.model.ItemCondition
+import com.example.multiplatformapplication.rememberResultResponder
 import com.example.multiplatformapplication.model.ListingCategory
 import com.example.multiplatformapplication.model.ListingStatus
 import com.example.multiplatformapplication.model.label
@@ -71,8 +72,12 @@ private val sampleListings =
  * so both filters share one source of truth and both survive rotation.
  */
 @Composable
-fun MarketplaceScreen(modifier: Modifier = Modifier) {
+fun MarketplaceScreen(
+    sendResult: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
     val navigator = LocalNavigator.current
+    val sendResultAndClose = rememberResultResponder()
     val listings = LocalListings.current
     var categoryName by rememberSaveable { mutableStateOf<String?>(null) }
     var conditionName by rememberSaveable { mutableStateOf<String?>(null) }
@@ -105,7 +110,15 @@ fun MarketplaceScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                MarketplaceHeader(onSell = { navigator.navigate(CreateScreenKey) })
+                MarketplaceHeader(
+                    onSell = { navigator.navigate(CreateScreenKey) },
+                    onReturnResult =
+                        if (sendResult) {
+                            { sendResultAndClose("Confirmed JACpot listings") }
+                        } else {
+                            null
+                        },
+                )
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -193,7 +206,10 @@ fun MarketplaceScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MarketplaceHeader(onSell: () -> Unit) {
+private fun MarketplaceHeader(
+    onSell: () -> Unit,
+    onReturnResult: (() -> Unit)? = null,
+) {
     FlowRow(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -207,6 +223,9 @@ private fun MarketplaceHeader(onSell: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+        if (onReturnResult != null) {
+            JACpotButton("Confirm & Return Result", onClick = onReturnResult)
         }
         JACpotButton("+ Sell an item", onClick = onSell)
     }

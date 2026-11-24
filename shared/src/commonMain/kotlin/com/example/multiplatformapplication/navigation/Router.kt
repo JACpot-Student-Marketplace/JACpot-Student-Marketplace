@@ -2,6 +2,7 @@ package com.example.multiplatformapplication.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -10,6 +11,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.example.multiplatformapplication.ExternalUriHandler
 import com.example.multiplatformapplication.data.mockRequests
 import com.example.multiplatformapplication.model.Request
 import com.example.multiplatformapplication.state.LocalListings
@@ -32,7 +34,9 @@ data object LoginScreenKey : NavKey
 data object HomeScreenKey : NavKey
 
 @Serializable
-data object MarketplaceScreenKey : NavKey
+data class MarketplaceScreenKey(
+    val sendResult: Boolean = false,
+) : NavKey
 
 @Serializable
 data object RequestsScreenKey : NavKey
@@ -78,6 +82,19 @@ fun Router() {
     val listings = LocalListings.current
     val createdRequests = remember { mutableStateListOf<Request>() }
     val sampleRequests = remember { mockRequests(Clock.System.now().toEpochMilliseconds()) }
+    val deepLinkResolver = remember { RouterDeepLinkResolver() }
+
+    DisposableEffect(Unit) {
+        ExternalUriHandler.listener = { uri ->
+            deepLinkResolver.resolve(uri)?.let { safeBackStackList ->
+                backStack.clear()
+                backStack.addAll(safeBackStackList)
+            }
+        }
+        onDispose {
+            ExternalUriHandler.listener = null
+        }
+    }
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
         NavDisplay(
@@ -87,8 +104,8 @@ fun Router() {
                 entryProvider {
                     entry<LoginScreenKey> { LoginScreen() }
                     entry<HomeScreenKey> { Shell(HomeScreenKey, navigator) { PlaceholderScreen("Home") } }
-                    entry<MarketplaceScreenKey> {
-                        Shell(MarketplaceScreenKey, navigator) { MarketplaceScreen() }
+                    entry<MarketplaceScreenKey> { key ->
+                        Shell(key, navigator) { MarketplaceScreen(sendResult = key.sendResult) }
                     }
                     entry<RequestsScreenKey> {
                         Shell(RequestsScreenKey, navigator) {
@@ -111,7 +128,7 @@ fun Router() {
                     entry<CreateScreenKey> {
                         CreateSellItemForm(onCreated = {
                             navigator.popUntil(HomeScreenKey)
-                            navigator.navigate(MarketplaceScreenKey)
+                            navigator.navigate(MarketplaceScreenKey())
                         })
                     }
                 },
