@@ -45,3 +45,19 @@ internal fun toEpochMillis(
     val doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
     return (era * 146_097 + doe - 719_468) * DAY_MS
 }
+
+private val shortMonths = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+/** "Mar 5, 2027" for an epoch-millis moment, in UTC (civil-from-days algorithm, the inverse of [toEpochMillis]). */
+internal fun formatDate(millis: Long): String {
+    val z = millis.floorDiv(DAY_MS) + 719_468
+    val era = z.floorDiv(146_097)
+    val doe = z - era * 146_097
+    val yoe = (doe - doe / 1_460 + doe / 36_524 - doe / 146_096) / 365
+    val doy = doe - (365 * yoe + yoe / 4 - yoe / 100)
+    val mp = (5 * doy + 2) / 153
+    val day = doy - (153 * mp + 2) / 5 + 1
+    val month = if (mp < 10) mp + 3 else mp - 9
+    val year = yoe + era * 400 + if (month <= 2) 1 else 0
+    return "${shortMonths[(month - 1).toInt()]} $day, $year"
+}

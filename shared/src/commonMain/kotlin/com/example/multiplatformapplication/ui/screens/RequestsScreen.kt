@@ -28,6 +28,7 @@ import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.EmptyFeed
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.RequestCard
+import com.example.multiplatformapplication.ui.components.RequestDetailsDialog
 import com.example.multiplatformapplication.ui.components.SearchBar
 import kotlin.time.Clock
 
@@ -43,6 +44,7 @@ fun RequestsScreen(
     val now = remember { Clock.System.now().toEpochMilliseconds() }
     val active = queryRequests(requests)
     val visible = queryRequests(requests, query)
+    var openRequestId by rememberSaveable { mutableStateOf<String?>(null) }
 
     BoxWithConstraints(modifier.fillMaxSize()) {
         val wide = maxWidth >= 600.dp
@@ -97,8 +99,12 @@ fun RequestsScreen(
                 }
             }
             items(visible, key = { it.id }) { request ->
-                RequestCard(request = request, now = now, modifier = Modifier.fillMaxWidth())
+                RequestCard(request = request, now = now, onClick = { openRequestId = request.id }, modifier = Modifier.fillMaxWidth())
             }
         }
+    }
+
+    requests.firstOrNull { it.id == openRequestId }?.let { request ->
+        RequestDetailsDialog(request = request, now = now, onDismiss = { openRequestId = null })
     }
 }
