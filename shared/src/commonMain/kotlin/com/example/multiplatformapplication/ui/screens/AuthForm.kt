@@ -45,3 +45,19 @@ internal fun validateLogin(
         email = emailFieldError(email),
         password = "Password is required.".takeIf { password.isBlank() },
     )
+
+internal data class ChangePasswordErrors(
+    val currentPassword: String? = null,
+    val newPassword: String? = null,
+) {
+    val any get() = listOfNotNull(currentPassword, newPassword).isNotEmpty()
+}
+
+internal fun validateChangePassword(
+    currentPassword: String,
+    newPassword: String,
+): ChangePasswordErrors =
+    ChangePasswordErrors(
+        currentPassword = "Current password is required.".takeIf { currentPassword.isBlank() },
+        newPassword = "Password is required.".takeIf { newPassword.isBlank() },
+    )
