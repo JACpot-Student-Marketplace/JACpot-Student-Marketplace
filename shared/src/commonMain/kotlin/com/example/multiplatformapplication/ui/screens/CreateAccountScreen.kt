@@ -29,6 +29,7 @@ import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.JACpotTextField
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
@@ -131,7 +132,9 @@ fun CreateAccountScreen() {
                             navigator.pop()
                         } catch (error: ApiException) {
                             serverError = error.message
-                        } catch (_: Exception) {
+                        } catch (error: CancellationException) {
+                            throw error
+                        } catch (_: Throwable) {
                             serverError = "Could not reach JACpot. Try again."
                         } finally {
                             busy = false

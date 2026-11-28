@@ -33,6 +33,7 @@ import com.example.multiplatformapplication.navigation.LocalNavigator
 import com.example.multiplatformapplication.ui.components.ButtonStyle
 import com.example.multiplatformapplication.ui.components.JACpotButton
 import com.example.multiplatformapplication.ui.components.JACpotTextField
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
@@ -146,7 +147,9 @@ fun LoginScreen() {
                             navigator.replace(HomeScreenKey)
                         } catch (error: ApiException) {
                             credentialsError = error.message
-                        } catch (_: Exception) {
+                        } catch (error: CancellationException) {
+                            throw error
+                        } catch (_: Throwable) {
                             credentialsError = "Could not reach JACpot. Try again."
                         } finally {
                             busy = false

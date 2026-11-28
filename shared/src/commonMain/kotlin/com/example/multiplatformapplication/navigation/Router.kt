@@ -1,6 +1,10 @@
 package com.example.multiplatformapplication.navigation
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateListOf
@@ -14,6 +18,7 @@ import com.example.multiplatformapplication.auth.AuthController
 import com.example.multiplatformapplication.data.mockRequests
 import com.example.multiplatformapplication.model.Request
 import com.example.multiplatformapplication.state.LocalListings
+import com.example.multiplatformapplication.ui.components.AccountMenu
 import com.example.multiplatformapplication.ui.screens.CreateAccountScreen
 import com.example.multiplatformapplication.ui.screens.CreateRequestScreen
 import com.example.multiplatformapplication.ui.screens.CreateSellItemForm
@@ -79,7 +84,8 @@ val LocalAuth =
 
 @Composable
 fun Router() {
-    val start = if (LocalAuth.current.session == null) LoginScreenKey else HomeScreenKey
+    val auth = LocalAuth.current
+    val start = if (auth.session == null) LoginScreenKey else HomeScreenKey
     val backStack = rememberNavBackStack(backStackConfig, start)
     val navigator = remember(backStack) { Navigator(backStack) }
     val listings = LocalListings.current
@@ -87,42 +93,46 @@ fun Router() {
     val sampleRequests = remember { mockRequests(Clock.System.now().toEpochMilliseconds()) }
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
-        NavDisplay(
-            backStack = backStack,
-            onBack = { navigator.pop() },
-            entryProvider =
-                entryProvider {
-                    entry<LoginScreenKey> { LoginScreen() }
-                    entry<HomeScreenKey> { Shell(HomeScreenKey, navigator) { PlaceholderScreen("Home") } }
-                    entry<MarketplaceScreenKey> {
-                        Shell(MarketplaceScreenKey, navigator) { MarketplaceScreen() }
-                    }
-                    entry<RequestsScreenKey> {
-                        Shell(RequestsScreenKey, navigator) {
-                            RequestsScreen(
-                                requests = createdRequests + sampleRequests,
-                                onPostRequest = { navigator.navigate(CreateRequestScreenKey) },
-                            )
+        Column(Modifier.fillMaxSize()) {
+            if (auth.session != null) AccountMenu()
+            NavDisplay(
+                backStack = backStack,
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                onBack = { navigator.pop() },
+                entryProvider =
+                    entryProvider {
+                        entry<LoginScreenKey> { LoginScreen() }
+                        entry<HomeScreenKey> { Shell(HomeScreenKey, navigator) { PlaceholderScreen("Home") } }
+                        entry<MarketplaceScreenKey> {
+                            Shell(MarketplaceScreenKey, navigator) { MarketplaceScreen() }
                         }
-                    }
-                    entry<CreateRequestScreenKey> {
-                        CreateRequestScreen(onSubmit = { request ->
-                            createdRequests.add(request)
-                            navigator.pop()
-                        })
-                    }
-                    entry<CreateAccountScreenKey> {
-                        CreateAccountScreen()
-                    }
-                    entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
-                    entry<CreateScreenKey> {
-                        CreateSellItemForm(onCreated = {
-                            navigator.popUntil(HomeScreenKey)
-                            navigator.navigate(MarketplaceScreenKey)
-                        })
-                    }
-                },
-        )
+                        entry<RequestsScreenKey> {
+                            Shell(RequestsScreenKey, navigator) {
+                                RequestsScreen(
+                                    requests = createdRequests + sampleRequests,
+                                    onPostRequest = { navigator.navigate(CreateRequestScreenKey) },
+                                )
+                            }
+                        }
+                        entry<CreateRequestScreenKey> {
+                            CreateRequestScreen(onSubmit = { request ->
+                                createdRequests.add(request)
+                                navigator.pop()
+                            })
+                        }
+                        entry<CreateAccountScreenKey> {
+                            CreateAccountScreen()
+                        }
+                        entry<ProfileScreenKey> { Shell(ProfileScreenKey, navigator) { PlaceholderScreen("Profile") } }
+                        entry<CreateScreenKey> {
+                            CreateSellItemForm(onCreated = {
+                                navigator.popUntil(HomeScreenKey)
+                                navigator.navigate(MarketplaceScreenKey)
+                            })
+                        }
+                    },
+            )
+        }
     }
 }
 
